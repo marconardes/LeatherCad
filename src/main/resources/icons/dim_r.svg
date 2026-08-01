@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Cota Raio CAD com indicacao 'R' -->
+  <path d="M4 20 A 16 16 0 0 1 20 4" />
+  <circle cx="4" cy="20" r="1.5" fill="currentColor" />
+  <line x1="4" y1="20" x2="16" y2="8" />
+  <polyline points="12,8 16,8 16,12" />
+  <text x="17" y="21" font-size="9" font-family="sans-serif" font-weight="bold" fill="currentColor" stroke="none">R</text>
+</svg>

@@ -1,0 +1,74 @@
+.root {
+    -fx-base: #1e1e1e;
+    -fx-background: #1e1e1e;
+    -fx-focus-color: #00a8ff;
+    -fx-faint-focus-color: transparent;
+}
+
+.tool-bar {
+    -fx-background-color: #252526;
+    -fx-border-color: #333333;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 10 6 10;
+    -fx-spacing: 8;
+}
+
+.button, .toggle-button {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 12px;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.button:hover, .toggle-button:hover {
+    -fx-background-color: #3e3e42;
+    -fx-text-fill: #ffffff;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #007acc;
+    -fx-text-fill: #ffffff;
+}
+
+.icon-only-button {
+    -fx-padding: 4 6 4 6;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-alignment: center;
+}
+
+.cad-icon-path {
+    -fx-fill: transparent;
+    -fx-stroke: #E0E0E5;
+    -fx-stroke-width: 1.8;
+}
+
+.toggle-button:selected .cad-icon-path {
+    -fx-stroke: #ffffff;
+}
+
+.button:hover .cad-icon-path, .toggle-button:hover .cad-icon-path {
+    -fx-stroke: #00a8ff;
+}
+
+
+.status-bar {
+    -fx-background-color: #007acc;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+}
+
+.label {
+    -fx-text-fill: #cccccc;
+}
+
+.title-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}

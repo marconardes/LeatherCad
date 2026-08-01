@@ -1,0 +1,101 @@
+==========================================================================
+         LEATHERCAD — MANUAL TÉCNICO DE MONTAGEM & GUIA DE OFICINA        
+==========================================================================
+Projeto: Manual Técnico de Montagem — Projeto LeatherCAD
+Data de Emissão: 2026-07-27
+Total de Peças de Corte: 8 unidades
+Furações de Garfo Chisel: 322 furos
+Trajeto Total de Costura: 1,21 metros
+--------------------------------------------------------------------------
+
+🛠️ FERRAMENTAS NECESSÁRIAS NA BANCADA:
+  [ ] Estilete / Faca de Corte Olfa / Cutter
+  [ ] Régua de Aço Inox em mm
+  [ ] Base de Corte Veda-Corte A3/A2
+  [ ] Faca de Rebaixar Skiving / French Edger / Biselador
+  [ ] Boleador / Ferramenta de Vinco Quente (Creaser 1.5mm)
+  [ ] Lâmpada de Álcool / Aquecedor Elétrico
+  [ ] Pincel Aplicador de Cola
+  [ ] Martelo de Nylon / Rolo de Pressão para Couro
+  [ ] Garfo / Pricking Iron (Passo 3.85mm)
+  [ ] Martelo / Macete de Polímero Reto (300g)
+  [ ] Tábua de Impacto PU para Furação
+  [ ] Agulhas de Ponta Cega para Couro (Nº 2/0)
+  [ ] Cavalete de Costura de Madeira (Stitching Pony)
+  [ ] Matriz de Fixação de Botões / Vazador Cilíndrico
+  [ ] Lixa d'Água Grão 400/600/1000
+  [ ] Brunidor de Madeira (Slicker de Jacarandá)
+  [ ] Rolinho Aplicador de Tinta de Borda
+
+📦 INSUMOS & MATERIAIS DE FABRICAÇÃO:
+  [ ] Couro Selecionado (Veg Tan / Cromo / Pull-up)
+  [ ] Cera de Abelha para Proteção da Lâmina
+  [ ] Cola de Contato de Borracha (Sem Tolueno)
+  [ ] Fio de Linha Poliéster Encerada 0.6mm (Cor Contrastante/Harmônica)
+  [ ] Botão de Pressão / Fecho Magnético 14mm em Latão
+  [ ] Goma Tragacanto / Goma Tokonole Japonesa
+  [ ] Tinta de Borda para Couro (Fosca/Brilhante)
+
+==========================================================================
+                  SEQUÊNCIA DE FABRICAÇÃO PASSO A PASSO                   
+==========================================================================
+
+ETAPA 1: [CORTE & PREPARAÇÃO] — Corte dos Moldes em Couro
+  Descrição: Posicione os gabaritos impressos em escala 1:1 sobre o couro e realize o corte manual de todas as 8 peças usando a faca de corte e régua de aço.
+  Ferramentas da Etapa: Estilete de precisão, Régua de Aço, Base de Corte
+  Insumos da Etapa:     Placa de Couro
+  Peças Alvo:           Painel de Couro (235x93mm), Painel de Couro (230x89mm), Painel de Couro (105x45mm), Painel de Couro (105x45mm), Painel de Couro (105x45mm), Painel de Couro (105x45mm), Painel de Couro (105x45mm), Painel de Couro (105x45mm)
+--------------------------------------------------------------------------
+
+ETAPA 2: [REBAIXAMENTO (SKIVING)] — Desbaste de Espessura nas Bordas de Encaixe
+  Descrição: Realize o biselamento e chanfro suave nas bordas das abas de porta-cartões para garantir encaixe plano e sem volume excessivo.
+  Ferramentas da Etapa: Faca de Rebaixar / Skiver, Biselador de Borda
+  Insumos da Etapa:     Cera protetora de lâmina
+  Peças Alvo:           Bordas de Encaixe, Porta-Cartões
+--------------------------------------------------------------------------
+
+ETAPA 3: [VINCOS & MARCAÇÃO] — Execução de Vincos de Dobra e Acabamento
+  Descrição: Aqueça o creaser a 120°C e passe firmemente sobre as linhas de vinco parametrizadas para guiar a dobra perfeita do couro.
+  Ferramentas da Etapa: Creaser 1.5mm, Aquecedor de Ferramentas
+  Insumos da Etapa:     Álcool de aquecimento
+  Peças Alvo:           Linha de Vinco Central, Bordas Decorativas
+--------------------------------------------------------------------------
+
+ETAPA 4: [COLAGEM & ALINHAMENTO] — Montagem Temporária dos Porta-Cartões e Abas
+  Descrição: Aplique uma camada fina e uniforme de cola de contato nas margens de colagem. Aguarde 5 minutos até secar o tato e pressione firmemente os porta-cartões usando o martelo de nylon.
+  Ferramentas da Etapa: Pincel de Cola, Martelo de Nylon, Rolo de Pressão
+  Insumos da Etapa:     Cola de Contato de Borracha
+  Peças Alvo:           Abas de Cartão, Moldura Principal
+--------------------------------------------------------------------------
+
+ETAPA 5: [FURAÇÃO DE COSTURA] — Marcação e Puncionamento dos Furos de Garfo
+  Descrição: Alinhe o garfo de costura de 3.85mm a 3.85mm da borda colada. Realize a furação perimetral perpendicular dos 322 mantendo o ângulo constante de 45°.
+  Ferramentas da Etapa: Garfo Francês 3.85mm, Macete de Polímero, Placa de Impacto PU
+  Insumos da Etapa:     Guia de Alinhamento
+  Peças Alvo:           Linha Perimetral de Costura
+--------------------------------------------------------------------------
+
+ETAPA 6: [COSTURA MANUAL (SADDLE STITCH)] — Costura em Ponto Sela com Duas Agulhas
+  Descrição: Corte 5,4m de fio encerado 0.6mm (4.5x o comprimento do trajeto). Passe duas agulhas nas extremidades e realize a costura ponto sela travada manual, finalizando com retrocesso de 2 furos e arremate cortado selado.
+  Ferramentas da Etapa: 2 Agulhas Cegas Nº 2/0, Cavalete de Madeira / Stitching Pony, Tesoura / Isqueiro de Arremate
+  Insumos da Etapa:     Fio Encerado Poliéster 0.6mm (5,4m)
+  Peças Alvo:           Contorno Perimetral Costurado
+--------------------------------------------------------------------------
+
+ETAPA 7: [FERRAGENS & FECHOS] — Instalação de Botões de Pressão e Componentes Metálicos
+  Descrição: Perfure o ponto de marcação com o vazador cilíndrico e posicione o fecho metálico. Remande o macho e fêmea com o balancim ou matriz manual até travar perfeitamente.
+  Ferramentas da Etapa: Vazador Cilíndrico, Matriz de Fixação / Balancim
+  Insumos da Etapa:     Ferragem Metálica (Latão/Prata)
+  Peças Alvo:           Pontos de Fecho
+--------------------------------------------------------------------------
+
+ETAPA 8: [ACABAMENTO DE BORDAS] — Lixamento, Brunimento Tokonole e Pintura de Borda
+  Descrição: Lixe a borda colada com lixa 400 até nivelar. Aplique goma Tokonole e frictionar firmemente com o brunidor de madeira até obter o brilho espelhado *burnished*. Opcionalmente aplique 2 demãos de tinta de borda.
+  Ferramentas da Etapa: Lixas Grão 400/800, Brunidor de Madeira, Rolinho de Tinta
+  Insumos da Etapa:     Goma Tokonole Japonesa, Tinta de Borda, Cera de Carnaúba
+  Peças Alvo:           Bordas Externas Expostas
+--------------------------------------------------------------------------
+
+==========================================================================
+               FIM DO MANUAL DE MONTAGEM — LEATHERCAD CAD               
+==========================================================================

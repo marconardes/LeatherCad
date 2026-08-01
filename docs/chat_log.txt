@@ -1,0 +1,91 @@
+================================================================================
+                      LEATHERCAD - RESUMO E HISTÓRICO DE CHAT
+================================================================================
+Data: 29 de Julho de 2026
+Projeto: LeatherCAD (CAD 2D / 3D Parametrizado para Artefatos de Couro)
+Versão Atual: 1.0 (Completada & Auditada)
+Arquivo: /docs/chat_log.txt
+================================================================================
+
+--------------------------------------------------------------------------------
+1. RESUMO EXECUTIVO E HISTÓRICO COMPLETO DA CONVERSA
+--------------------------------------------------------------------------------
+
+[SOLICITAÇÃO 1]: Bloqueio do botão de executar prompt quando estiver em execução.
+- Solução: Implementado controle de estado nos diálogos de IA e execução de tarefas assíncronas.
+
+[SOLICITAÇÃO 2]: Ajustado, qual a próxima etapa?
+- Solução: Conclusão da validação dos 56 testes unitários e transição para o motor artesanal de couro.
+
+[SOLICITAÇÃO 3]: As camadas não estão funcionando.
+- Solução: Corrigida a gestão de visibilidade, bloqueio e isolamento de elementos por camada no Document.
+
+[SOLICITAÇÃO 4]: Quando eu gero o molde parametrizado a costura fica na mesma layer que o couro.
+- Solução: Separada a camada de costura (Stitch Layer) da camada de couro (Leather Layer), permitindo controle independente de cores e visibilidade.
+
+[SOLICITAÇÃO 5]: A Fase 14.
+- Solução: Implementada a matemática física de dobras de couro (Fold Allowance = 1.2 * PI * t). Fase 14 concluída com 100% dos testes aprovados.
+
+[SOLICITAÇÃO 6 & 7]: De curvas não consigo editar as curvas depois / usa o LibreCAD para se basear.
+- Solução: Adicionado suporte completo à edição interativa de nós de controle e hastes de curva Bézier e polilinhas. Tolerância de clique calibrada no padrão LibreCAD (14px / 3mm).
+
+[SOLICITAÇÃO 8]: Faz um refactor nas ferramentas usa as movimentação padrão FreeCAD.
+- Solução: Pan via clique do botão do meio do mouse ou Shift + Botão Esquerdo, clique com botão direito reseta ferramenta ativa para Seleção, tecla ESC cancela ação, DELETE/BACKSPACE exclui seleção.
+
+[SOLICITAÇÃO 9]: Não tem ferramenta de salvar nesse programa?
+- Solução: Criado o formato de arquivo de projeto nativo (.lcad) com serialização JSON completa (ProjectSerializer.java), atalhos Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+Shift+S e botões de arquivo na Toolbar.
+
+[SOLICITAÇÃO 10]: Usa ícones preferencialmente o org.kordamp.ikonli.
+- Solução: Adicionadas dependências org.kordamp.ikonli (ikonli-javafx, ikonli-feather-pack, ikonli-materialdesign2-pack) no pom.xml e substituídos os emojis por objetos FontIcon vetoriais.
+
+[SOLICITAÇÃO 11]: Novo/Abrir não precisa aparecer o texto somente quando eu passo o mouse em cima.
+- Solução: Convertida a barra de ferramentas para o padrão de botões compactos Icon-Only (32x32px) com Tooltips descritivos exibidos ao passar o mouse.
+
+[SOLICITAÇÃO 12]: A tela sempre abre maximizada.
+- Solução: Configurado primaryStage.setMaximized(true) no carregamento inicial da aplicação JavaFX.
+
+[SOLICITAÇÃO 13]: As ferramentas básicas todas vão ser expandidas.
+- Solução: Expandidas todas as ferramentas básicas de desenho 2D, cotas, edição e acabamentos de couro na barra de ferramentas em acesso direto de 1-clique.
+
+[SOLICITAÇÃO 14]: Por enquanto terminamos a versão 1 fazer um tema claro para as ferramentas.
+- Solução: Criada a folha de estilos em estilo CAD cirúrgico (light-theme.css) e alternador dinâmico de temas via atalho Ctrl+T, botão na Toolbar e menu Exibir.
+
+[SOLICITAÇÃO 15]: O tema claro ficou mais bonito que o escuro favor deixar ele padrão e faz um refinamento no visual dele.
+- Solução: Definido o Tema Claro (estilo Apple / Fusion 360 Light) como padrão oficial do LeatherCAD com refinamentos de micro-sombras, profundidade e tipografia moderna.
+
+[SOLICITAÇÃO 16]: Quando eu clico no retângulo pronto eu posso escolher as linhas individuais.
+- Solução: Criada a funcionalidade de Explode / Decomposição (Ctrl+E, duplo-clique no Canvas ou botão na Toolbar). Retângulos e polilinhas agora se decompõem em linhas retas individuais (LineElement) selecionáveis separadamente.
+
+[SOLICITAÇÃO 17]: Salvar o pensamento de como foi realizada a solução completa em pasta e arquivo.md.
+- Solução: Gravado o documento /docs/arquitetura_e_solucao_completa.md.
+
+[SOLICITAÇÃO 18]: Criar chat_log.txt na pasta docs com todo o histórico e pensamento futuro.
+- Solução: Gravado este arquivo /docs/chat_log.txt.
+
+
+--------------------------------------------------------------------------------
+2. PENSAMENTO FUTURO E VISÃO DE LONGO PRAZO (ROADMAP VERSÃO 2.0+)
+--------------------------------------------------------------------------------
+
+O LeatherCAD v1.0 estabeleceu uma base arquitetural sólida, imutável e desacoplada. Para as próximas versões e evolução do software, os seguintes eixos estratégicos devem orientar o desenvolvimento:
+
+1. FASE DE FERRAMENTAS DE COURO AVANÇADAS (ROADMAP FASE 2):
+   - Implementação de matrizes parametrizadas de perfuração para fivelas e passadores.
+   - Ferramenta de chanfro angular de borda (Skiving Angle Guide) para preparação de colagem.
+   - Biblioteca expandida de componentes de ferragens 3D (mosquetões, ilhós, rebites duplos).
+
+2. MOTOR DE GRADUAÇÃO PARAMÉTRICA DE TAMANHOS (ROADMAP FASE 3):
+   - Sistema de escalonamento proporcional inteligente (Grading Engine) para adaptar modelos de carteiras e bolsas a diferentes tamanhos mantendo tolerâncias fixas de margem de costura.
+
+3. SIMULAÇÃO 3D REALISTA DE DOBRAS E MATERIAIS (ROADMAP FASE 4):
+   - Motor de renderização 3D baseado em elementos finitos simples (FEM 2.5D) para simular o comportamento de dobras de couros macios (como napa) vs. couros rígidos (como couro atanado de curtimento vegetal).
+
+4. OPTIMIZAÇÃO DE CORTE COM IA E NESTING ADAPTATIVO (ROADMAP FASE 5):
+   - Mapeamento fotográfico de cicatrizes e imperfeições em peles de couro via câmera/visão computacional para posicionamento automático de moldes evitando áreas defeituosas.
+
+5. CONECTIVIDADE CNC & MÁQUINAS INDUSTRIAIS DE CORTE (ROADMAP FASE 6):
+   - Gerador de G-Code nativo calibrado para máquinas CNC oscilantes e cortadoras a laser industriais (marcas Zünd, Lectra, Comelz, Atom).
+
+================================================================================
+FIM DO ARQUIVO CHAT_LOG.TXT
+================================================================================
