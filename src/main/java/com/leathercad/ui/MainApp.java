@@ -116,6 +116,7 @@ public class MainApp extends Application {
                     viewport.redraw();
                 }
                 case ESCAPE -> {
+                    toolManager.resetActiveTool();
                     document.clearSelection();
                     viewport.redraw();
                 }
