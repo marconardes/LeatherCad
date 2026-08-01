@@ -1,6 +1,7 @@
 com/leathercad/core/model/SubElementRef.class
 com/leathercad/core/parametric/ParametricEngine.class
 com/leathercad/ui/SimulationDialog.class
+com/leathercad/ui/tools/OffsetTool.class
 com/leathercad/ui/tools/FilletTool.class
 com/leathercad/core/leather/CreaseElement.class
 com/leathercad/ui/CornerRadiusDialog.class
@@ -43,6 +44,7 @@ com/leathercad/core/render/PhotorealisticRenderer.class
 com/leathercad/ui/viewport/CameraTransform.class
 com/leathercad/core/model/PolylineElement.class
 com/leathercad/core/parametric/FoldType.class
+com/leathercad/core/geometry/GeometryOffset.class
 com/leathercad/ui/tools/BezierTool.class
 com/leathercad/core/geometry/Point2D.class
 com/leathercad/core/geometry/Polyline2D.class

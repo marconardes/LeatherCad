@@ -24,4 +24,8 @@ public interface CADElement {
     default Optional<SubElementRef> findSubElementAt(Point2D p, double toleranceMm) {
         return Optional.empty();
     }
+
+    default CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        return copyWithNewId();
+    }
 }

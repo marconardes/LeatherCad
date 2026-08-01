@@ -197,6 +197,9 @@ public class MainApp extends Application {
         MenuItem filletToolItem = new MenuItem("📐 Arredondamento de Cantos (Fillet)...");
         filletToolItem.setOnAction(e -> CornerRadiusDialog.showDialog(primaryStage, document, viewport, toolManager, 5.0));
 
+        MenuItem offsetToolItem = new MenuItem("✂️ Margem de Costura / Offset...");
+        offsetToolItem.setOnAction(e -> toolManager.setActiveTool("Margem de Costura / Offset"));
+
         MenuItem r3Item = new MenuItem("Arredondar Seleção (R3)");
         r3Item.setOnAction(e -> { document.setCornerRadiusSelected(3.0, 3.0, 3.0, 3.0); viewport.redraw(); });
 
@@ -224,7 +227,7 @@ public class MainApp extends Application {
             viewport.redraw();
         });
 
-        leatherMenu.getItems().addAll(filletToolItem, new SeparatorMenuItem(), r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
+        leatherMenu.getItems().addAll(filletToolItem, offsetToolItem, new SeparatorMenuItem(), r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
 
         Menu compMenu = new Menu("Componentes");
         MenuItem cardSlotItem = new MenuItem("💳 Porta-Cartão (95x55mm)");
@@ -496,6 +499,9 @@ public class MainApp extends Application {
         ToggleButton stitchBtn = CADIconFactory.createIconToggleButton(IconType.STITCH, "Costura Parametrizada de Couro (Chisel)", toolGroup);
         stitchBtn.setOnAction(e -> toolManager.setActiveTool("Costura Parametrizada"));
 
+        ToggleButton offsetBtn = CADIconFactory.createIconToggleButton(IconType.OFFSET, "Margem de Costura / Offset Paralelo (O)", toolGroup);
+        offsetBtn.setOnAction(e -> toolManager.setActiveTool("Margem de Costura / Offset"));
+
         ToggleButton dimHBtn = CADIconFactory.createIconToggleButton(IconType.DIM_HORIZONTAL, "Cota Horizontal", toolGroup);
         dimHBtn.setOnAction(e -> toolManager.setActiveTool("Cota Horizontal"));
 
@@ -635,7 +641,7 @@ public class MainApp extends Application {
         return new ToolBar(
             newBtn, openBtn, saveBtn,
             new Separator(Orientation.VERTICAL),
-            selectBtn, lineBtn, rectBtn, circleBtn, polylineBtn, arcBtn, bezierBtn, stitchBtn,
+            selectBtn, lineBtn, rectBtn, circleBtn, polylineBtn, arcBtn, bezierBtn, stitchBtn, offsetBtn,
             new Separator(Orientation.VERTICAL),
             dimHBtn, dimVBtn, dimRBtn,
             new Separator(Orientation.VERTICAL),

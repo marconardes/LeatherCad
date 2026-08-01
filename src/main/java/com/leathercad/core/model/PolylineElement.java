@@ -95,4 +95,10 @@ public record PolylineElement(String id, String layerId, Polyline2D polyline) im
     public CADElement copyWithNewId() {
         return new PolylineElement(UUID.randomUUID().toString(), layerId, polyline);
     }
+
+    @Override
+    public CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        var offsetPoly = com.leathercad.core.geometry.GeometryOffset.offset(polyline, cursorPoint, distanceMm);
+        return new PolylineElement(UUID.randomUUID().toString(), targetLayerId, offsetPoly);
+    }
 }

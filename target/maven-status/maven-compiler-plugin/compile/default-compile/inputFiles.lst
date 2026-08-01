@@ -15,6 +15,7 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/Arc2D.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/Bezier2D.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/Circle2D.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/GeometryOffset.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/LineSegment.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/Point2D.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/geometry/Polyline2D.java
@@ -97,6 +98,7 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/DimensionTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/FilletTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/LineTool.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/OffsetTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/PolylineTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/RectTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/SelectTool.java

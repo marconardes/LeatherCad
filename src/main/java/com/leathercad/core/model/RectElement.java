@@ -117,4 +117,10 @@ public record RectElement(String id, String layerId, Rect2D rect) implements CAD
     public CADElement copyWithNewId() {
         return new RectElement(UUID.randomUUID().toString(), layerId, rect);
     }
+
+    @Override
+    public CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        var offsetRect = com.leathercad.core.geometry.GeometryOffset.offset(rect, cursorPoint, distanceMm);
+        return new RectElement(UUID.randomUUID().toString(), targetLayerId, offsetRect);
+    }
 }

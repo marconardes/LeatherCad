@@ -37,7 +37,8 @@ public class CADIconFactory {
         DELETE("M 5,5 L 19,19 M 19,5 L 5,19"),
         EXPLODE("M 3,3 L 9,3 M 15,3 L 21,3 M 21,9 L 21,15 M 21,21 L 15,21 M 9,21 L 3,21 M 3,15 L 3,9"),
         CORNER("M 4,4 L 14,4 A 6,6 0 0,1 20,10 L 20,20 M 14,4 L 20,4 L 20,10"),
-        CREASE("M 3,8 L 21,8 M 3,14 L 21,14");
+        CREASE("M 3,8 L 21,8 M 3,14 L 21,14"),
+        OFFSET("M 4,4 h 12 v 12 h -12 Z M 8,8 h 12 v 12 h -12 Z");
 
         private final String pathData;
 

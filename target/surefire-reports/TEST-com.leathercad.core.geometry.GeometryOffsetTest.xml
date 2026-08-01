@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.leathercad.core.AuditQATest" time="0.254" tests="19" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.leathercad.core.geometry.GeometryOffsetTest" time="0.01" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -54,23 +54,9 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testLayerLockAndVisibilityProtection" classname="com.leathercad.core.AuditQATest" time="0.002"/>
-  <testcase name="testSpatialParentingAndGroupMovement" classname="com.leathercad.core.AuditQATest" time="0.02"/>
-  <testcase name="testPolylineShiftOrthoMode" classname="com.leathercad.core.AuditQATest" time="0.002"/>
-  <testcase name="testDimensionCleanupOnElementDelete" classname="com.leathercad.core.AuditQATest" time="0.006"/>
-  <testcase name="testProjectSaveAndLoad" classname="com.leathercad.core.AuditQATest" time="0.175"/>
-  <testcase name="testInnerElementSelectionPriority" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testFoldAllowanceMath" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testMultiLevelNestedRectangles" classname="com.leathercad.core.AuditQATest" time="0.002"/>
-  <testcase name="testExportersFidelity" classname="com.leathercad.core.AuditQATest" time="0.013"/>
-  <testcase name="testPerCornerRadiiOnRectangle" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testLineIntersectionSnap" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testCircleInsideCircleParenting" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testFilletBetweenTwoSelectedLines" classname="com.leathercad.core.AuditQATest" time="0.002"/>
-  <testcase name="testDocumentBoundingBoxCalculation" classname="com.leathercad.core.AuditQATest" time="0.0"/>
-  <testcase name="testSubElementFilletApplication" classname="com.leathercad.core.AuditQATest" time="0.003"/>
-  <testcase name="testPolylineDimensionsAndAngles" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testFreeCADSubElementSelection" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testExplodeRectangleToIndividualLines" classname="com.leathercad.core.AuditQATest" time="0.001"/>
-  <testcase name="testBezierNodeEditing" classname="com.leathercad.core.AuditQATest" time="0.002"/>
+  <testcase name="testLineSegmentOffset" classname="com.leathercad.core.geometry.GeometryOffsetTest" time="0.002"/>
+  <testcase name="testPolyline2DOffsetOpen" classname="com.leathercad.core.geometry.GeometryOffsetTest" time="0.001"/>
+  <testcase name="testCircle2DOffsetInternalAndExternal" classname="com.leathercad.core.geometry.GeometryOffsetTest" time="0.001"/>
+  <testcase name="testArc2DOffsetInternalAndExternal" classname="com.leathercad.core.geometry.GeometryOffsetTest" time="0.001"/>
+  <testcase name="testRect2DOffsetInternalAndExternal" classname="com.leathercad.core.geometry.GeometryOffsetTest" time="0.001"/>
 </testsuite>

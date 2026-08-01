@@ -57,7 +57,30 @@ public record LineElement(String id, String layerId, LineSegment line) implement
     }
 
     @Override
+    public java.util.List<SubElementRef> getSubElements() {
+        return java.util.List.of(
+            new SubElementRef(id, SubElementRef.SubElementType.EDGE, 0),
+            new SubElementRef(id, SubElementRef.SubElementType.VERTEX, 0),
+            new SubElementRef(id, SubElementRef.SubElementType.VERTEX, 1)
+        );
+    }
+
+    @Override
+    public java.util.Optional<SubElementRef> findSubElementAt(Point2D p, double toleranceMm) {
+        if (p.distanceTo(line.start()) <= toleranceMm) return java.util.Optional.of(new SubElementRef(id, SubElementRef.SubElementType.VERTEX, 0));
+        if (p.distanceTo(line.end()) <= toleranceMm) return java.util.Optional.of(new SubElementRef(id, SubElementRef.SubElementType.VERTEX, 1));
+        if (line.distanceToPoint(p) <= toleranceMm) return java.util.Optional.of(new SubElementRef(id, SubElementRef.SubElementType.EDGE, 0));
+        return java.util.Optional.empty();
+    }
+
+    @Override
     public CADElement copyWithNewId() {
         return new LineElement(UUID.randomUUID().toString(), layerId, line);
+    }
+
+    @Override
+    public CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        var offsetLine = com.leathercad.core.geometry.GeometryOffset.offset(line, cursorPoint, distanceMm);
+        return new LineElement(UUID.randomUUID().toString(), targetLayerId, offsetLine);
     }
 }

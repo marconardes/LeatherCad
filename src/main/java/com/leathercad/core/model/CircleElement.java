@@ -52,4 +52,10 @@ public record CircleElement(String id, String layerId, Circle2D circle) implemen
     public CADElement copyWithNewId() {
         return new CircleElement(UUID.randomUUID().toString(), layerId, circle);
     }
+
+    @Override
+    public CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        var offsetCircle = com.leathercad.core.geometry.GeometryOffset.offset(circle, cursorPoint, distanceMm);
+        return new CircleElement(UUID.randomUUID().toString(), targetLayerId, offsetCircle);
+    }
 }

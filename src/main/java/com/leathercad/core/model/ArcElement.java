@@ -68,4 +68,10 @@ public record ArcElement(String id, String layerId, Arc2D arc) implements CADEle
     public CADElement copyWithNewId() {
         return new ArcElement(UUID.randomUUID().toString(), layerId, arc);
     }
+
+    @Override
+    public CADElement createOffset(Point2D cursorPoint, double distanceMm, String targetLayerId) {
+        var offsetArc = com.leathercad.core.geometry.GeometryOffset.offset(arc, cursorPoint, distanceMm);
+        return new ArcElement(UUID.randomUUID().toString(), targetLayerId, offsetArc);
+    }
 }

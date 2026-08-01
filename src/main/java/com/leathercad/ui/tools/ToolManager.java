@@ -22,6 +22,7 @@ public class ToolManager {
         CADTool dimR = new DimensionTool(DimensionElement.DimensionType.RADIUS);
         CADTool stitchTool = new StitchTool();
         CADTool filletTool = new FilletTool();
+        CADTool offsetTool = new OffsetTool();
 
         tools.put(selectTool.getName(), selectTool);
         tools.put(lineTool.getName(), lineTool);
@@ -35,6 +36,7 @@ public class ToolManager {
         tools.put(dimR.getName(), dimR);
         tools.put(stitchTool.getName(), stitchTool);
         tools.put(filletTool.getName(), filletTool);
+        tools.put(offsetTool.getName(), offsetTool);
 
         activeTool = selectTool;
     }
