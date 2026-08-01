@@ -8,6 +8,7 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/leather/LeatherEngineTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/materials/MaterialLibraryTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/model/CADAssemblerTest.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/model/DocumentFilletTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/model/EditTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/nesting/NestingEngineTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/parametric/FormulaEngineTest.java
@@ -18,3 +19,5 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/render/RenderEngineTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/simulation/SimulationEngineTest.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/core/snap/SnapEngineTest.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/ui/tools/BasicGeometryToolsTest.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/test/java/com/leathercad/ui/tools/SelectToolTest.java

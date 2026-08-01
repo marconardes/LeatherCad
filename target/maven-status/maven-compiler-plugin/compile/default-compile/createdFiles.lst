@@ -1,6 +1,7 @@
 com/leathercad/core/model/SubElementRef.class
 com/leathercad/core/parametric/ParametricEngine.class
 com/leathercad/ui/SimulationDialog.class
+com/leathercad/ui/tools/FilletTool.class
 com/leathercad/core/leather/CreaseElement.class
 com/leathercad/ui/CornerRadiusDialog.class
 com/leathercad/ui/ProductionReportDialog.class
@@ -17,6 +18,7 @@ com/leathercad/ui/tools/DimensionTool.class
 com/leathercad/ui/ModelTreeViewPanel$TreeItemData.class
 com/leathercad/core/model/Layer.class
 com/leathercad/core/leather/StitchType.class
+com/leathercad/core/geometry/Arc2D$FilletResult.class
 com/leathercad/core/production/BOMItem.class
 com/leathercad/ui/tools/SelectTool.class
 com/leathercad/core/geometry/Circle2D.class

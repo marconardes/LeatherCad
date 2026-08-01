@@ -74,5 +74,59 @@ public record Arc2D(Point2D center, double radius, double startAngleDegrees, dou
 
         return Optional.of(new Arc2D(center, radius, a0, sweep));
     }
+
+    public record FilletResult(Point2D tA, Point2D tB, Point2D center, double effectiveRadius, double startDeg, double sweepDeg, Arc2D arc) {}
+
+    /**
+     * Calcula o arco de concordância tangencial (Fillet) entre o segmento (pA -> vertex) e (vertex -> pB).
+     */
+    public static Optional<FilletResult> calculateFillet(Point2D pA, Point2D vertex, Point2D pB, double radiusMm) {
+        if (pA == null || vertex == null || pB == null || radiusMm <= 0) {
+            return Optional.empty();
+        }
+
+        double lenA = pA.distanceTo(vertex);
+        double lenB = pB.distanceTo(vertex);
+        if (lenA < 1e-4 || lenB < 1e-4) {
+            return Optional.empty();
+        }
+
+        Point2D u = new Point2D((pA.x() - vertex.x()) / lenA, (pA.y() - vertex.y()) / lenA);
+        Point2D w = new Point2D((pB.x() - vertex.x()) / lenB, (pB.y() - vertex.y()) / lenB);
+
+        double cosTheta = u.x() * w.x() + u.y() * w.y();
+        if (Math.abs(cosTheta) >= 0.999) {
+            return Optional.empty(); // Linhas colineares ou paralelas
+        }
+
+        double halfAngleRad = Math.acos(cosTheta) / 2.0;
+        double tangentDist = radiusMm / Math.tan(halfAngleRad);
+
+        double maxTangent = Math.min(lenA, lenB) * 0.95;
+        if (tangentDist > maxTangent) {
+            tangentDist = maxTangent;
+        }
+        double effectiveRadius = tangentDist * Math.tan(halfAngleRad);
+
+        Point2D tA = new Point2D(vertex.x() + tangentDist * u.x(), vertex.y() + tangentDist * u.y());
+        Point2D tB = new Point2D(vertex.x() + tangentDist * w.x(), vertex.y() + tangentDist * w.y());
+
+        Point2D nU = new Point2D(-u.y(), u.x());
+        if (nU.x() * w.x() + nU.y() * w.y() < 0) {
+            nU = new Point2D(-nU.x(), -nU.y());
+        }
+        Point2D center = new Point2D(tA.x() + effectiveRadius * nU.x(), tA.y() + effectiveRadius * nU.y());
+
+        double startDeg = Math.toDegrees(Math.atan2(tA.y() - center.y(), tA.x() - center.x()));
+        double endDeg = Math.toDegrees(Math.atan2(tB.y() - center.y(), tB.x() - center.x()));
+        double sweepDeg = endDeg - startDeg;
+
+        while (sweepDeg <= -180.0) sweepDeg += 360.0;
+        while (sweepDeg > 180.0) sweepDeg -= 360.0;
+
+        Arc2D arc = new Arc2D(center, effectiveRadius, startDeg, sweepDeg);
+        return Optional.of(new FilletResult(tA, tB, center, effectiveRadius, startDeg, sweepDeg, arc));
+    }
 }
+
 

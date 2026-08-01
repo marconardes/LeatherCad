@@ -194,17 +194,20 @@ public class MainApp extends Application {
         editMenu.getItems().addAll(moveItem, copyItem, rotateItem, mirrorItem, deleteItem, new SeparatorMenuItem(), explodeItem);
 
         Menu leatherMenu = new Menu("Couro");
-        MenuItem r3Item = new MenuItem("Arredondar Cantos (R3)");
-        r3Item.setOnAction(e -> { document.setCornerRadiusSelected(3.0); viewport.redraw(); });
+        MenuItem filletToolItem = new MenuItem("📐 Arredondamento de Cantos (Fillet)...");
+        filletToolItem.setOnAction(e -> CornerRadiusDialog.showDialog(primaryStage, document, viewport, toolManager, 5.0));
 
-        MenuItem r5Item = new MenuItem("Arredondar Cantos (R5)");
-        r5Item.setOnAction(e -> { document.setCornerRadiusSelected(5.0); viewport.redraw(); });
+        MenuItem r3Item = new MenuItem("Arredondar Seleção (R3)");
+        r3Item.setOnAction(e -> { document.setCornerRadiusSelected(3.0, 3.0, 3.0, 3.0); viewport.redraw(); });
 
-        MenuItem r8Item = new MenuItem("Arredondar Cantos (R8)");
-        r8Item.setOnAction(e -> { document.setCornerRadiusSelected(8.0); viewport.redraw(); });
+        MenuItem r5Item = new MenuItem("Arredondar Seleção (R5)");
+        r5Item.setOnAction(e -> { document.setCornerRadiusSelected(5.0, 5.0, 5.0, 5.0); viewport.redraw(); });
 
-        MenuItem r10Item = new MenuItem("Arredondar Cantos (R10)");
-        r10Item.setOnAction(e -> { document.setCornerRadiusSelected(10.0); viewport.redraw(); });
+        MenuItem r8Item = new MenuItem("Arredondar Seleção (R8)");
+        r8Item.setOnAction(e -> { document.setCornerRadiusSelected(8.0, 8.0, 8.0, 8.0); viewport.redraw(); });
+
+        MenuItem r10Item = new MenuItem("Arredondar Seleção (R10)");
+        r10Item.setOnAction(e -> { document.setCornerRadiusSelected(10.0, 10.0, 10.0, 10.0); viewport.redraw(); });
 
         MenuItem creaseItem = new MenuItem("Adicionar Vinco Borda (1.5mm)");
         creaseItem.setOnAction(e -> {
@@ -221,7 +224,7 @@ public class MainApp extends Application {
             viewport.redraw();
         });
 
-        leatherMenu.getItems().addAll(r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
+        leatherMenu.getItems().addAll(filletToolItem, new SeparatorMenuItem(), r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
 
         Menu compMenu = new Menu("Componentes");
         MenuItem cardSlotItem = new MenuItem("💳 Porta-Cartão (95x55mm)");
@@ -520,16 +523,8 @@ public class MainApp extends Application {
         Button explodeBtn = CADIconFactory.createIconButton(IconType.EXPLODE, "Explodir Retângulo em 4 Linhas Individuais (Ctrl+E)");
         explodeBtn.setOnAction(e -> { document.explodeSelected(); viewport.redraw(); });
 
-        Button r5Btn = CADIconFactory.createIconButton(IconType.CORNER, "Arredondar Cantos de Couro (Selecione quais cantos)");
-        r5Btn.setOnAction(e -> {
-            boolean hasRect = document.getSelectedElementIds().stream().anyMatch(id -> document.findElementById(id) instanceof com.leathercad.core.model.RectElement);
-            if (hasRect) {
-                CornerRadiusDialog.showDialog(primaryStage, document, viewport, 5.0);
-            } else {
-                document.setCornerRadiusSelected(5.0);
-                viewport.redraw();
-            }
-        });
+        Button r5Btn = CADIconFactory.createIconButton(IconType.CORNER, "Arredondar Cantos / Fillet de Couro");
+        r5Btn.setOnAction(e -> CornerRadiusDialog.showDialog(primaryStage, document, viewport, toolManager, 5.0));
 
         Button r10Btn = CADIconFactory.createIconButton(IconType.CORNER, "Arredondar Cantos de Couro (Raio 10mm)");
         r10Btn.setOnAction(e -> {

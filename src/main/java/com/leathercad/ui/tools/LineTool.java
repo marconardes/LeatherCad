@@ -2,7 +2,6 @@ package com.leathercad.ui.tools;
 
 import com.leathercad.core.geometry.LineSegment;
 import com.leathercad.core.geometry.Point2D;
-import com.leathercad.core.model.DimensionElement;
 import com.leathercad.core.model.Document;
 import com.leathercad.core.model.LineElement;
 import com.leathercad.core.snap.SnapEngine;
@@ -41,18 +40,8 @@ public class LineTool implements CADTool {
                 LineSegment line = new LineSegment(startPoint, effectivePoint);
                 LineElement element = new LineElement(document.getActiveLayer().getId(), line);
                 document.addElement(element);
-
-                DimensionElement dim = new DimensionElement(
-                    document.getActiveLayer().getId(),
-                    startPoint, effectivePoint,
-                    DimensionElement.DimensionType.HORIZONTAL,
-                    4.0
-                );
-                document.addElement(dim);
             }
-            startPoint = null;
-            currentHover = null;
-            currentEffective = null;
+            reset();
         }
     }
 
@@ -84,21 +73,44 @@ public class LineTool implements CADTool {
             Point2D s = camera.worldToScreen(startPoint);
             Point2D e = camera.worldToScreen(previewPoint);
 
+            // Linha tracejada de preview
             gc.setStroke(Color.web("#00A8FF"));
             gc.setLineWidth(1.5);
             gc.setLineDashes(4.0);
             gc.strokeLine(s.x(), s.y(), e.x(), e.y());
             gc.setLineDashes(null);
 
+            // Cálculo das cotas dinâmicas: Comprimento e Ângulo [0°, 360°)
             double realLength = startPoint.distanceTo(previewPoint);
+            double dx = previewPoint.x() - startPoint.x();
+            double dy = previewPoint.y() - startPoint.y();
+            double angleDeg = Math.toDegrees(Math.atan2(dy, dx));
+            if (angleDeg < 0) {
+                angleDeg += 360.0;
+            }
+
             String orthoTag = (isShiftPressed && !isSnapActive) ? " [ORTHO 🔒]" : "";
-            String dimText = String.format("Comp: %.2f mm%s", realLength, orthoTag);
+            String dimText = String.format("Comp: %.2f mm | Ângulo: %.1f°%s", realLength, angleDeg, orthoTag);
 
+            // Renderização do Badge HUD ao lado do cursor
             Point2D rawMouseSc = camera.worldToScreen(currentHover);
+            double badgeX = rawMouseSc.x() + 15;
+            double badgeY = rawMouseSc.y() - 25;
 
-            gc.setFill(Color.web("#00A8FF"));
-            gc.setFont(Font.font("Consolas", 12));
-            gc.fillText(dimText, rawMouseSc.x() + 10, rawMouseSc.y() - 5);
+            Font font = Font.font("Consolas", 12);
+            gc.setFont(font);
+            double textWidth = dimText.length() * 7.2 + 16;
+            double textHeight = 22;
+
+            gc.setFill(Color.rgb(20, 24, 30, 0.85));
+            gc.fillRoundRect(badgeX, badgeY - 14, textWidth, textHeight, 6, 6);
+
+            gc.setStroke(Color.web("#00A8FF"));
+            gc.setLineWidth(1.0);
+            gc.strokeRoundRect(badgeX, badgeY - 14, textWidth, textHeight, 6, 6);
+
+            gc.setFill(Color.WHITE);
+            gc.fillText(dimText, badgeX + 8, badgeY + 1);
         }
     }
 
@@ -111,4 +123,3 @@ public class LineTool implements CADTool {
         isSnapActive = false;
     }
 }
-

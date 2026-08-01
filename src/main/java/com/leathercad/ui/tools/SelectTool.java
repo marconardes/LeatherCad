@@ -2,10 +2,7 @@ package com.leathercad.ui.tools;
 
 import com.leathercad.core.geometry.Point2D;
 import com.leathercad.core.geometry.Rect2D;
-import com.leathercad.core.model.BezierElement;
-import com.leathercad.core.model.CADElement;
-import com.leathercad.core.model.Document;
-import com.leathercad.core.model.PolylineElement;
+import com.leathercad.core.model.*;
 import com.leathercad.ui.viewport.CameraTransform;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -23,7 +20,7 @@ public class SelectTool implements CADTool {
     private boolean isDraggingNode = false;
     private String activeNodeElementId = null;
     private int activeHandleIndex = -1;
-    private int nodeType = 0; // 1 = Bezier, 2 = Polyline, 3 = Line
+    private int nodeType = 0; // 1 = Bezier, 2 = Polyline, 3 = Line, 4 = Rect, 5 = Circle, 6 = Arc
 
     private Document currentDoc = null;
 
@@ -36,13 +33,9 @@ public class SelectTool implements CADTool {
         double handleHitRadius = Math.max(2.5, 12.0 / camera.getZoom());
         double pickToleranceMm = Math.max(3.0, 14.0 / camera.getZoom());
 
-        // Se mais de 1 elemento estiver selecionado, priorizar arraste de todo o grupo selecionado
-        boolean isMultiSelection = document.getSelectedElementIds().size() > 1;
-
-        // 1. Detecção de Nós de Controle (apenas se NÃO for uma seleção múltipla de grupo já ativa)
-        if (!isMultiSelection) {
-            for (CADElement elem : document.getElements()) {
-            var layer = document.findLayerById(elem.layerId());
+        // 1. Hit-Testing de Grips de Controle (para qualquer elemento selecionado ou visível)
+        for (CADElement elem : document.getElements()) {
+            Layer layer = document.findLayerById(elem.layerId());
             if (layer != null && (!layer.isVisible() || layer.isLocked())) continue;
 
             if (elem instanceof BezierElement bezierElem) {
@@ -73,7 +66,7 @@ public class SelectTool implements CADTool {
                         return;
                     }
                 }
-            } else if (elem instanceof com.leathercad.core.model.LineElement lineElem) {
+            } else if (elem instanceof LineElement lineElem) {
                 var line = lineElem.line();
                 if (worldPoint.distanceTo(line.start()) <= handleHitRadius) {
                     document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
@@ -84,13 +77,73 @@ public class SelectTool implements CADTool {
                     startNodeDrag(elem.id(), 2, 3, worldPoint);
                     return;
                 }
+            } else if (elem instanceof RectElement rectElem) {
+                var r = rectElem.rect();
+                Point2D c0 = r.minPoint();
+                Point2D c1 = new Point2D(r.minPoint().x() + r.width(), r.minPoint().y());
+                Point2D c2 = new Point2D(r.minPoint().x() + r.width(), r.minPoint().y() + r.height());
+                Point2D c3 = new Point2D(r.minPoint().x(), r.minPoint().y() + r.height());
+                if (worldPoint.distanceTo(c0) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 0, 4, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(c1) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 1, 4, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(c2) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 2, 4, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(c3) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 3, 4, worldPoint);
+                    return;
+                }
+            } else if (elem instanceof CircleElement circleElem) {
+                var c = circleElem.circle();
+                Point2D center = c.center();
+                double radius = c.radius();
+                Point2D qTop = new Point2D(center.x(), center.y() - radius);
+                Point2D qRight = new Point2D(center.x() + radius, center.y());
+                Point2D qBottom = new Point2D(center.x(), center.y() + radius);
+                Point2D qLeft = new Point2D(center.x() - radius, center.y());
+
+                if (worldPoint.distanceTo(center) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 0, 5, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(qTop) <= handleHitRadius || worldPoint.distanceTo(qRight) <= handleHitRadius ||
+                           worldPoint.distanceTo(qBottom) <= handleHitRadius || worldPoint.distanceTo(qLeft) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 1, 5, worldPoint);
+                    return;
+                }
+            } else if (elem instanceof ArcElement arcElem) {
+                var a = arcElem.arc();
+                Point2D center = a.center();
+                Point2D startP = a.startPoint();
+                Point2D endP = a.endPoint();
+
+                if (worldPoint.distanceTo(center) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 0, 6, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(startP) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 1, 6, worldPoint);
+                    return;
+                } else if (worldPoint.distanceTo(endP) <= handleHitRadius) {
+                    document.selectElement(elem.id(), event.isControlDown() || event.isShiftDown());
+                    startNodeDrag(elem.id(), 2, 6, worldPoint);
+                    return;
+                }
             }
-        }
         }
 
         double subPickToleranceMm = Math.max(8.0, 24.0 / camera.getZoom());
 
-        // 2. Seleção padrão por corpo de elemento ou sub-elemento estilo FreeCAD (1 clique direto)
+        // 2. Seleção padrão por corpo de elemento (1 clique direto)
         Optional<CADElement> clicked = document.findElementAt(worldPoint, pickToleranceMm);
 
         if (clicked.isPresent()) {
@@ -114,10 +167,6 @@ public class SelectTool implements CADTool {
                 }
             }
 
-            if (event.getClickCount() == 2) {
-                // Duplo clique NÃO explode o molde de couro!
-                return;
-            }
             isDraggingSelection = true;
             dragStartWorld = worldPoint;
             boxStartPoint = null;
@@ -145,21 +194,20 @@ public class SelectTool implements CADTool {
     @Override
     public void onMouseDragged(MouseEvent event, Point2D worldPoint, Document document, CameraTransform camera) {
         if (isDraggingNode && activeNodeElementId != null) {
-            if (nodeType == 1) {
-                document.updateBezierControlPoint(activeNodeElementId, activeHandleIndex, worldPoint);
-            } else if (nodeType == 2) {
-                document.updatePolylineVertex(activeNodeElementId, activeHandleIndex, worldPoint);
-            } else if (nodeType == 3) {
-                document.updateLineEndpoint(activeNodeElementId, activeHandleIndex, worldPoint);
+            switch (nodeType) {
+                case 1 -> document.updateBezierControlPoint(activeNodeElementId, activeHandleIndex, worldPoint);
+                case 2 -> document.updatePolylineVertex(activeNodeElementId, activeHandleIndex, worldPoint);
+                case 3 -> document.updateLineEndpoint(activeNodeElementId, activeHandleIndex, worldPoint);
+                case 4 -> document.updateRectCorner(activeNodeElementId, activeHandleIndex, worldPoint);
+                case 5 -> document.updateCircleGrip(activeNodeElementId, activeHandleIndex, worldPoint);
+                case 6 -> document.updateArcGrip(activeNodeElementId, activeHandleIndex, worldPoint);
             }
         } else if (isDraggingSelection && dragStartWorld != null) {
-            if (document.getSelectedElementIds().size() > 1) {
-                double dx = worldPoint.x() - dragStartWorld.x();
-                double dy = worldPoint.y() - dragStartWorld.y();
-                if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
-                    document.moveSelected(dx, dy);
-                    dragStartWorld = worldPoint;
-                }
+            double dx = worldPoint.x() - dragStartWorld.x();
+            double dy = worldPoint.y() - dragStartWorld.y();
+            if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
+                document.moveSelected(dx, dy);
+                dragStartWorld = worldPoint;
             }
         } else if (boxStartPoint != null) {
             boxCurrentPoint = worldPoint;
@@ -175,24 +223,44 @@ public class SelectTool implements CADTool {
             return;
         }
 
-        if (boxStartPoint != null && boxCurrentPoint != null) {
+        if (boxStartPoint != null) {
+            if (worldPoint != null) {
+                boxCurrentPoint = worldPoint;
+            }
             double minX = Math.min(boxStartPoint.x(), boxCurrentPoint.x());
             double minY = Math.min(boxStartPoint.y(), boxCurrentPoint.y());
-            double w = Math.abs(boxCurrentPoint.x() - boxStartPoint.x());
-            double h = Math.abs(boxCurrentPoint.y() - boxStartPoint.y());
+            double maxX = Math.max(boxStartPoint.x(), boxCurrentPoint.x());
+            double maxY = Math.max(boxStartPoint.y(), boxCurrentPoint.y());
+            double w = maxX - minX;
+            double h = maxY - minY;
 
             if (w > 0.5 && h > 0.5) {
                 Rect2D selectionRect = new Rect2D(minX, minY, w, h);
                 boolean multiSelect = event.isControlDown() || event.isShiftDown();
                 if (!multiSelect) document.clearSelection();
 
+                // Padrão CAD Técnico:
+                // Window (Esquerda -> Direita): apenas elementos 100% contidos
+                // Crossing (Direita -> Esquerda): elementos contidos ou interceptados
+                boolean isWindow = boxCurrentPoint.x() >= boxStartPoint.x();
+
                 for (CADElement elem : document.getElements()) {
-                    var layer = document.findLayerById(elem.layerId());
+                    Layer layer = document.findLayerById(elem.layerId());
                     if (layer != null && (!layer.isVisible() || layer.isLocked())) continue;
 
                     Rect2D bbox = elem.boundingBox();
-                    if (intersects(selectionRect, bbox)) {
-                        document.selectElement(elem.id(), true);
+                    if (isWindow) {
+                        // Totalmente contido na caixa
+                        Point2D elemMin = bbox.minPoint();
+                        Point2D elemMax = new Point2D(elemMin.x() + bbox.width(), elemMin.y() + bbox.height());
+                        if (selectionRect.contains(elemMin) && selectionRect.contains(elemMax)) {
+                            document.selectElement(elem.id(), true);
+                        }
+                    } else {
+                        // Intercepta ou contido
+                        if (intersects(selectionRect, bbox)) {
+                            document.selectElement(elem.id(), true);
+                        }
                     }
                 }
             }
@@ -237,17 +305,28 @@ public class SelectTool implements CADTool {
             double w = Math.abs(e.x() - s.x());
             double h = Math.abs(e.y() - s.y());
 
-            gc.setFill(Color.web("#00A8FF", 0.15));
-            gc.fillRect(x, y, w, h);
+            boolean isWindow = boxCurrentPoint.x() >= boxStartPoint.x();
 
-            gc.setStroke(Color.web("#00A8FF"));
-            gc.setLineWidth(1.0);
-            gc.setLineDashes(4.0);
-            gc.strokeRect(x, y, w, h);
-            gc.setLineDashes(null);
+            if (isWindow) {
+                // Window Selection (Esquerda -> Direita): Azul contínuo
+                gc.setFill(Color.web("#00A8FF", 0.15));
+                gc.fillRect(x, y, w, h);
+                gc.setStroke(Color.web("#00A8FF"));
+                gc.setLineWidth(1.0);
+                gc.strokeRect(x, y, w, h);
+            } else {
+                // Crossing Selection (Direita -> Esquerda): Verde tracejado
+                gc.setFill(Color.web("#00FF88", 0.15));
+                gc.fillRect(x, y, w, h);
+                gc.setStroke(Color.web("#00FF88"));
+                gc.setLineWidth(1.0);
+                gc.setLineDashes(4.0);
+                gc.strokeRect(x, y, w, h);
+                gc.setLineDashes(null);
+            }
         }
 
-        // 2. Renderizar Handles Especiais de Controle para Curvas Bézier e Polilinhas Selecionadas
+        // 2. Renderizar Handles e Grips de Controle para os Elementos Selecionados
         if (currentDoc != null && !currentDoc.getSelectedElementIds().isEmpty()) {
             for (String selId : currentDoc.getSelectedElementIds()) {
                 CADElement elem = currentDoc.findElementById(selId);
@@ -255,12 +334,18 @@ public class SelectTool implements CADTool {
                     renderBezierHandles(gc, camera, bezierElem);
                 } else if (elem instanceof PolylineElement polyElem) {
                     renderPolylineHandles(gc, camera, polyElem);
-                } else if (elem instanceof com.leathercad.core.model.LineElement lineElem) {
+                } else if (elem instanceof LineElement lineElem) {
                     renderLineHandles(gc, camera, lineElem);
+                } else if (elem instanceof RectElement rectElem) {
+                    renderRectHandles(gc, camera, rectElem);
+                } else if (elem instanceof CircleElement circleElem) {
+                    renderCircleHandles(gc, camera, circleElem);
+                } else if (elem instanceof ArcElement arcElem) {
+                    renderArcHandles(gc, camera, arcElem);
                 }
             }
 
-            // Renderizar Bounding Box Global & Handle de Rotação
+            // 3. Renderizar Bounding Box Global & Handle de Rotação da Seleção
             double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE;
             double maxX = -Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
             boolean hasSelection = false;
@@ -294,9 +379,9 @@ public class SelectTool implements CADTool {
                 // Handle de Rotação no Topo
                 double hs = 6.0;
                 gc.setStroke(Color.web("#00A8FF"));
-                gc.strokeLine(x + w/2, y, x + w/2, y - 18);
+                gc.strokeLine(x + w / 2, y, x + w / 2, y - 18);
                 gc.setFill(Color.web("#00A8FF"));
-                gc.fillOval(x + w/2 - hs/2, y - 18 - hs/2, hs, hs);
+                gc.fillOval(x + w / 2 - hs / 2, y - 18 - hs / 2, hs, hs);
             }
         }
     }
@@ -308,32 +393,27 @@ public class SelectTool implements CADTool {
         Point2D c2 = camera.worldToScreen(b.control2());
         Point2D e = camera.worldToScreen(b.end());
 
-        // Haste 1: start -> control1 (Linha tracejada amarela)
         gc.setStroke(Color.web("#FFD700"));
         gc.setLineWidth(1.2);
         gc.setLineDashes(3.0);
         gc.strokeLine(s.x(), s.y(), c1.x(), c1.y());
-
-        // Haste 2: end -> control2 (Linha tracejada amarela)
         gc.strokeLine(e.x(), e.y(), c2.x(), c2.y());
         gc.setLineDashes(null);
 
-        // Nós de Ponto Inicial e Final (Quadrados Verdes Neon)
         double nodeSize = 8.0;
         gc.setFill(Color.web("#00FF88"));
-        gc.fillRect(s.x() - nodeSize/2, s.y() - nodeSize/2, nodeSize, nodeSize);
-        gc.fillRect(e.x() - nodeSize/2, e.y() - nodeSize/2, nodeSize, nodeSize);
+        gc.fillRect(s.x() - nodeSize / 2, s.y() - nodeSize / 2, nodeSize, nodeSize);
+        gc.fillRect(e.x() - nodeSize / 2, e.y() - nodeSize / 2, nodeSize, nodeSize);
 
-        // Nós de Pontos de Controle da Tangente (Círculos Amarelos)
         double ctrlSize = 8.0;
         gc.setFill(Color.web("#FFD700"));
-        gc.fillOval(c1.x() - ctrlSize/2, c1.y() - ctrlSize/2, ctrlSize, ctrlSize);
-        gc.fillOval(c2.x() - ctrlSize/2, c2.y() - ctrlSize/2, ctrlSize, ctrlSize);
+        gc.fillOval(c1.x() - ctrlSize / 2, c1.y() - ctrlSize / 2, ctrlSize, ctrlSize);
+        gc.fillOval(c2.x() - ctrlSize / 2, c2.y() - ctrlSize / 2, ctrlSize, ctrlSize);
 
         gc.setStroke(Color.web("#FFFFFF"));
         gc.setLineWidth(1.0);
-        gc.strokeOval(c1.x() - ctrlSize/2, c1.y() - ctrlSize/2, ctrlSize, ctrlSize);
-        gc.strokeOval(c2.x() - ctrlSize/2, c2.y() - ctrlSize/2, ctrlSize, ctrlSize);
+        gc.strokeOval(c1.x() - ctrlSize / 2, c1.y() - ctrlSize / 2, ctrlSize, ctrlSize);
+        gc.strokeOval(c2.x() - ctrlSize / 2, c2.y() - ctrlSize / 2, ctrlSize, ctrlSize);
     }
 
     private void renderPolylineHandles(GraphicsContext gc, CameraTransform camera, PolylineElement elem) {
@@ -342,17 +422,80 @@ public class SelectTool implements CADTool {
         gc.setFill(Color.web("#00A8FF"));
         for (Point2D p : pts) {
             Point2D sp = camera.worldToScreen(p);
-            gc.fillRect(sp.x() - hs/2, sp.y() - hs/2, hs, hs);
+            gc.fillRect(sp.x() - hs / 2, sp.y() - hs / 2, hs, hs);
         }
     }
 
-    private void renderLineHandles(GraphicsContext gc, CameraTransform camera, com.leathercad.core.model.LineElement elem) {
+    private void renderLineHandles(GraphicsContext gc, CameraTransform camera, LineElement elem) {
         var line = elem.line();
         Point2D s = camera.worldToScreen(line.start());
         Point2D e = camera.worldToScreen(line.end());
         double hs = 7.0;
         gc.setFill(Color.web("#00FF88"));
-        gc.fillRect(s.x() - hs/2, s.y() - hs/2, hs, hs);
-        gc.fillRect(e.x() - hs/2, e.y() - hs/2, hs, hs);
+        gc.fillRect(s.x() - hs / 2, s.y() - hs / 2, hs, hs);
+        gc.fillRect(e.x() - hs / 2, e.y() - hs / 2, hs, hs);
+    }
+
+    private void renderRectHandles(GraphicsContext gc, CameraTransform camera, RectElement elem) {
+        var r = elem.rect();
+        Point2D c0 = camera.worldToScreen(r.minPoint());
+        Point2D c1 = camera.worldToScreen(new Point2D(r.minPoint().x() + r.width(), r.minPoint().y()));
+        Point2D c2 = camera.worldToScreen(new Point2D(r.minPoint().x() + r.width(), r.minPoint().y() + r.height()));
+        Point2D c3 = camera.worldToScreen(new Point2D(r.minPoint().x(), r.minPoint().y() + r.height()));
+
+        double hs = 7.0;
+        gc.setFill(Color.web("#00FF88"));
+        gc.fillRect(c0.x() - hs / 2, c0.y() - hs / 2, hs, hs);
+        gc.fillRect(c1.x() - hs / 2, c1.y() - hs / 2, hs, hs);
+        gc.fillRect(c2.x() - hs / 2, c2.y() - hs / 2, hs, hs);
+        gc.fillRect(c3.x() - hs / 2, c3.y() - hs / 2, hs, hs);
+    }
+
+    private void renderCircleHandles(GraphicsContext gc, CameraTransform camera, CircleElement elem) {
+        var c = elem.circle();
+        Point2D centerSc = camera.worldToScreen(c.center());
+        double r = c.radius();
+
+        Point2D qTop = camera.worldToScreen(new Point2D(c.center().x(), c.center().y() - r));
+        Point2D qRight = camera.worldToScreen(new Point2D(c.center().x() + r, c.center().y()));
+        Point2D qBottom = camera.worldToScreen(new Point2D(c.center().x(), c.center().y() + r));
+        Point2D qLeft = camera.worldToScreen(new Point2D(c.center().x() - r, c.center().y()));
+
+        double hs = 7.0;
+        gc.setFill(Color.web("#FFD700"));
+        gc.fillOval(centerSc.x() - hs / 2, centerSc.y() - hs / 2, hs, hs);
+
+        gc.setFill(Color.web("#00FF88"));
+        gc.fillRect(qTop.x() - hs / 2, qTop.y() - hs / 2, hs, hs);
+        gc.fillRect(qRight.x() - hs / 2, qRight.y() - hs / 2, hs, hs);
+        gc.fillRect(qBottom.x() - hs / 2, qBottom.y() - hs / 2, hs, hs);
+        gc.fillRect(qLeft.x() - hs / 2, qLeft.y() - hs / 2, hs, hs);
+    }
+
+    private void renderArcHandles(GraphicsContext gc, CameraTransform camera, ArcElement elem) {
+        var a = elem.arc();
+        Point2D centerSc = camera.worldToScreen(a.center());
+        Point2D startSc = camera.worldToScreen(a.startPoint());
+        Point2D endSc = camera.worldToScreen(a.endPoint());
+
+        double hs = 7.0;
+        gc.setFill(Color.web("#FFD700"));
+        gc.fillOval(centerSc.x() - hs / 2, centerSc.y() - hs / 2, hs, hs);
+
+        gc.setFill(Color.web("#00FF88"));
+        gc.fillRect(startSc.x() - hs / 2, startSc.y() - hs / 2, hs, hs);
+        gc.fillRect(endSc.x() - hs / 2, endSc.y() - hs / 2, hs, hs);
+    }
+
+    @Override
+    public void reset() {
+        boxStartPoint = null;
+        boxCurrentPoint = null;
+        isDraggingSelection = false;
+        dragStartWorld = null;
+        isDraggingNode = false;
+        activeNodeElementId = null;
+        activeHandleIndex = -1;
+        nodeType = 0;
     }
 }

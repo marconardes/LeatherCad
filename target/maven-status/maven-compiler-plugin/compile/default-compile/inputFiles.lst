@@ -95,6 +95,7 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/CADTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/CircleTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/DimensionTool.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/FilletTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/LineTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/PolylineTool.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/ui/tools/RectTool.java

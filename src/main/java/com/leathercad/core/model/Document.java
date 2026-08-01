@@ -1,6 +1,7 @@
 package com.leathercad.core.model;
 
 import com.leathercad.core.geometry.Point2D;
+import com.leathercad.core.geometry.Polyline2D;
 import com.leathercad.core.geometry.Rect2D;
 
 import java.util.*;
@@ -476,41 +477,60 @@ public class Document {
 
     public void setCornerRadiusSelected(double radiusMm) {
         if (!selectedSubElements.isEmpty()) {
-            for (SubElementRef subRef : selectedSubElements) {
-                CADElement elem = findElementById(subRef.elementId());
+            Map<String, Set<SubElementRef>> subMap = new HashMap<>();
+            for (SubElementRef s : selectedSubElements) {
+                subMap.computeIfAbsent(s.elementId(), k -> new HashSet<>()).add(s);
+            }
+
+            for (Map.Entry<String, Set<SubElementRef>> entry : subMap.entrySet()) {
+                String elemId = entry.getKey();
+                Set<SubElementRef> subs = entry.getValue();
+                CADElement elem = findElementById(elemId);
                 if (elem instanceof RectElement rectElem) {
                     var r = rectElem.rect();
-                    double rTL = r.rTopLeft();
-                    double rTR = r.rTopRight();
-                    double rBR = r.rBottomRight();
-                    double rBL = r.rBottomLeft();
-
                     Set<Integer> edgeIndices = new HashSet<>();
                     Set<Integer> vertexIndices = new HashSet<>();
-
-                    for (SubElementRef s : selectedSubElements) {
-                        if (s.elementId().equals(rectElem.id())) {
-                            if (s.type() == SubElementRef.SubElementType.EDGE) edgeIndices.add(s.index());
-                            if (s.type() == SubElementRef.SubElementType.VERTEX) vertexIndices.add(s.index());
-                        }
+                    for (SubElementRef s : subs) {
+                        if (s.type() == SubElementRef.SubElementType.EDGE) edgeIndices.add(s.index());
+                        if (s.type() == SubElementRef.SubElementType.VERTEX) vertexIndices.add(s.index());
                     }
 
-                    if (edgeIndices.contains(0) && edgeIndices.contains(3)) rTL = radiusMm;
-                    if (edgeIndices.contains(0) && edgeIndices.contains(1)) rTR = radiusMm;
-                    if (edgeIndices.contains(1) && edgeIndices.contains(2)) rBR = radiusMm;
-                    if (edgeIndices.contains(2) && edgeIndices.contains(3)) rBL = radiusMm;
+                    boolean selTL = vertexIndices.contains(0) || (edgeIndices.contains(0) && edgeIndices.contains(3));
+                    boolean selTR = vertexIndices.contains(1) || (edgeIndices.contains(0) && edgeIndices.contains(1));
+                    boolean selBR = vertexIndices.contains(2) || (edgeIndices.contains(1) && edgeIndices.contains(2));
+                    boolean selBL = vertexIndices.contains(3) || (edgeIndices.contains(2) && edgeIndices.contains(3));
 
-                    if (vertexIndices.contains(0)) rTL = radiusMm;
-                    if (vertexIndices.contains(1)) rTR = radiusMm;
-                    if (vertexIndices.contains(2)) rBR = radiusMm;
-                    if (vertexIndices.contains(3)) rBL = radiusMm;
+                    double rTL = selTL ? radiusMm : 0.0;
+                    double rTR = selTR ? radiusMm : 0.0;
+                    double rBR = selBR ? radiusMm : 0.0;
+                    double rBL = selBL ? radiusMm : 0.0;
 
                     int index = elements.indexOf(rectElem);
                     Rect2D newRect = new Rect2D(r.minPoint(), r.width(), r.height(), rTL, rTR, rBR, rBL);
                     elements.set(index, new RectElement(rectElem.id(), rectElem.layerId(), newRect));
+                } else if (elem instanceof PolylineElement polyElem) {
+                    Set<Integer> edgeIndices = new HashSet<>();
+                    Set<Integer> vertexIndices = new HashSet<>();
+                    for (SubElementRef s : subs) {
+                        if (s.type() == SubElementRef.SubElementType.EDGE) edgeIndices.add(s.index());
+                        if (s.type() == SubElementRef.SubElementType.VERTEX) vertexIndices.add(s.index());
+                    }
+                    var pts = polyElem.polyline().points();
+                    int numPts = pts.size();
+                    boolean isClosed = polyElem.polyline().isClosed();
+                    for (int i = 0; i < numPts; i++) {
+                        int prevEdge = (i > 0) ? (i - 1) : (isClosed ? numPts - 1 : -1);
+                        int nextEdge = i;
+                        boolean vertexSelected = vertexIndices.contains(i);
+                        boolean bothEdgesSelected = (prevEdge >= 0 && edgeIndices.contains(prevEdge) && edgeIndices.contains(nextEdge));
+                        if (vertexSelected || bothEdgesSelected) {
+                            applyFilletAtVertex(elem, i, radiusMm);
+                        }
+                    }
                 }
             }
             selectedSubElements.clear();
+            notifyDocumentChanged();
             return;
         }
 
@@ -518,6 +538,45 @@ public class Document {
     }
 
     public void setCornerRadiusSelected(double rTL, double rTR, double rBR, double rBL) {
+        if (!selectedSubElements.isEmpty()) {
+            Map<String, Set<SubElementRef>> subMap = new HashMap<>();
+            for (SubElementRef s : selectedSubElements) {
+                subMap.computeIfAbsent(s.elementId(), k -> new HashSet<>()).add(s);
+            }
+
+            for (Map.Entry<String, Set<SubElementRef>> entry : subMap.entrySet()) {
+                String elemId = entry.getKey();
+                Set<SubElementRef> subs = entry.getValue();
+                CADElement elem = findElementById(elemId);
+                if (elem instanceof RectElement rectElem) {
+                    var r = rectElem.rect();
+                    Set<Integer> edgeIndices = new HashSet<>();
+                    Set<Integer> vertexIndices = new HashSet<>();
+                    for (SubElementRef s : subs) {
+                        if (s.type() == SubElementRef.SubElementType.EDGE) edgeIndices.add(s.index());
+                        if (s.type() == SubElementRef.SubElementType.VERTEX) vertexIndices.add(s.index());
+                    }
+
+                    boolean selTL = vertexIndices.contains(0) || (edgeIndices.contains(0) && edgeIndices.contains(3));
+                    boolean selTR = vertexIndices.contains(1) || (edgeIndices.contains(0) && edgeIndices.contains(1));
+                    boolean selBR = vertexIndices.contains(2) || (edgeIndices.contains(1) && edgeIndices.contains(2));
+                    boolean selBL = vertexIndices.contains(3) || (edgeIndices.contains(2) && edgeIndices.contains(3));
+
+                    double finalTL = selTL ? rTL : 0.0;
+                    double finalTR = selTR ? rTR : 0.0;
+                    double finalBR = selBR ? rBR : 0.0;
+                    double finalBL = selBL ? rBL : 0.0;
+
+                    int index = elements.indexOf(rectElem);
+                    Rect2D newRect = new Rect2D(r.minPoint(), r.width(), r.height(), finalTL, finalTR, finalBR, finalBL);
+                    elements.set(index, new RectElement(rectElem.id(), rectElem.layerId(), newRect));
+                }
+            }
+            selectedSubElements.clear();
+            notifyDocumentChanged();
+            return;
+        }
+
         List<LineElement> selectedLines = new ArrayList<>();
         for (String id : selectedElementIds) {
             CADElement elem = findElementById(id);
@@ -539,6 +598,84 @@ public class Document {
         if (selectedLines.size() == 2) {
             applyFilletBetweenLines(selectedLines.get(0), selectedLines.get(1), rTL);
         }
+        notifyDocumentChanged();
+    }
+
+    public boolean applyFilletAtVertex(CADElement elem, int vertexIndex, double radiusMm) {
+        if (elem == null || radiusMm <= 0) return false;
+        Layer layer = findLayerById(elem.layerId());
+        if (layer != null && (layer.isLocked() || !layer.isVisible())) return false;
+
+        if (elem instanceof RectElement rectElem) {
+            Rect2D r = rectElem.rect();
+            double rTL = (vertexIndex == 0) ? radiusMm : r.rTopLeft();
+            double rTR = (vertexIndex == 1) ? radiusMm : r.rTopRight();
+            double rBR = (vertexIndex == 2) ? radiusMm : r.rBottomRight();
+            double rBL = (vertexIndex == 3) ? radiusMm : r.rBottomLeft();
+
+            Rect2D newRect = new Rect2D(r.minPoint(), r.width(), r.height(), rTL, rTR, rBR, rBL);
+            RectElement newElem = new RectElement(rectElem.id(), rectElem.layerId(), newRect);
+            int idx = elements.indexOf(rectElem);
+            if (idx >= 0) {
+                elements.set(idx, newElem);
+                return true;
+            }
+        } else if (elem instanceof PolylineElement polyElem) {
+            var pts = polyElem.polyline().points();
+            int numPts = pts.size();
+            if (numPts < 2) return false;
+
+            boolean isClosed = polyElem.polyline().isClosed();
+            if (!isClosed && (vertexIndex == 0 || vertexIndex == numPts - 1)) {
+                return false;
+            }
+
+            Point2D v = pts.get(vertexIndex);
+            Point2D pA = (vertexIndex > 0) ? pts.get(vertexIndex - 1) : pts.get(numPts - 1);
+            Point2D pB = (vertexIndex < numPts - 1) ? pts.get(vertexIndex + 1) : pts.get(0);
+
+            var filletOpt = com.leathercad.core.geometry.Arc2D.calculateFillet(pA, v, pB, radiusMm);
+            if (filletOpt.isEmpty()) return false;
+
+            var fRes = filletOpt.get();
+            ArcElement newArc = new ArcElement(polyElem.layerId(), fRes.arc());
+            elements.add(newArc);
+
+            List<Point2D> newPts = new ArrayList<>();
+            for (int i = 0; i < numPts; i++) {
+                if (i == vertexIndex) {
+                    newPts.add(fRes.tA());
+                    newPts.add(fRes.tB());
+                } else {
+                    newPts.add(pts.get(i));
+                }
+            }
+            Polyline2D newPolyline = new Polyline2D(newPts, isClosed);
+            PolylineElement newPolyElem = new PolylineElement(polyElem.id(), polyElem.layerId(), newPolyline);
+            int idx = elements.indexOf(polyElem);
+            if (idx >= 0) {
+                elements.set(idx, newPolyElem);
+                return true;
+            }
+        } else if (elem instanceof LineElement lineElem) {
+            Point2D start = lineElem.line().start();
+            Point2D end = lineElem.line().end();
+            Point2D targetV = (vertexIndex == 0) ? start : end;
+
+            LineElement adjacent = null;
+            for (CADElement other : elements) {
+                if (other instanceof LineElement otherLine && !other.id().equals(lineElem.id())) {
+                    if (otherLine.line().start().distanceTo(targetV) < 1e-2 || otherLine.line().end().distanceTo(targetV) < 1e-2) {
+                        adjacent = otherLine;
+                        break;
+                    }
+                }
+            }
+            if (adjacent != null) {
+                return applyFilletBetweenLines(lineElem, adjacent, radiusMm);
+            }
+        }
+        return false;
     }
 
     public boolean applyFilletBetweenLines(LineElement lineElemA, LineElement lineElemB, double radiusMm) {
@@ -575,42 +712,14 @@ public class Document {
             pB = (b1.distanceTo(v) > b2.distanceTo(v)) ? b1 : b2;
         }
 
-        double lenA = pA.distanceTo(v);
-        double lenB = pB.distanceTo(v);
-        if (lenA < 1e-4 || lenB < 1e-4) return false;
+        var filletOpt = com.leathercad.core.geometry.Arc2D.calculateFillet(pA, v, pB, radiusMm);
+        if (filletOpt.isEmpty()) return false;
 
-        Point2D u = new Point2D((pA.x() - v.x()) / lenA, (pA.y() - v.y()) / lenA);
-        Point2D w = new Point2D((pB.x() - v.x()) / lenB, (pB.y() - v.y()) / lenB);
+        var fRes = filletOpt.get();
 
-        double cosTheta = u.x() * w.x() + u.y() * w.y();
-        if (Math.abs(cosTheta) >= 0.999) return false;
-
-        double halfAngleRad = Math.acos(cosTheta) / 2.0;
-        double tangentDist = radiusMm / Math.tan(halfAngleRad);
-
-        if (tangentDist >= lenA) tangentDist = lenA * 0.9;
-        if (tangentDist >= lenB) tangentDist = lenB * 0.9;
-        double effectiveRadius = tangentDist * Math.tan(halfAngleRad);
-
-        Point2D tA = new Point2D(v.x() + tangentDist * u.x(), v.y() + tangentDist * u.y());
-        Point2D tB = new Point2D(v.x() + tangentDist * w.x(), v.y() + tangentDist * w.y());
-
-        Point2D nU = new Point2D(-u.y(), u.x());
-        if (nU.x() * w.x() + nU.y() * w.y() < 0) {
-            nU = new Point2D(-nU.x(), -nU.y());
-        }
-        Point2D center = new Point2D(tA.x() + effectiveRadius * nU.x(), tA.y() + effectiveRadius * nU.y());
-
-        double startDeg = Math.toDegrees(Math.atan2(tA.y() - center.y(), tA.x() - center.x()));
-        double endDeg = Math.toDegrees(Math.atan2(tB.y() - center.y(), tB.x() - center.x()));
-        double sweepDeg = endDeg - startDeg;
-
-        while (sweepDeg <= -180.0) sweepDeg += 360.0;
-        while (sweepDeg > 180.0) sweepDeg -= 360.0;
-
-        LineElement newA = new LineElement(lineElemA.id(), lineElemA.layerId(), new com.leathercad.core.geometry.LineSegment(pA, tA));
-        LineElement newB = new LineElement(lineElemB.id(), lineElemB.layerId(), new com.leathercad.core.geometry.LineSegment(tB, pB));
-        ArcElement newArc = new ArcElement(lineElemA.layerId(), new com.leathercad.core.geometry.Arc2D(center, effectiveRadius, startDeg, sweepDeg));
+        LineElement newA = new LineElement(lineElemA.id(), lineElemA.layerId(), new com.leathercad.core.geometry.LineSegment(pA, fRes.tA()));
+        LineElement newB = new LineElement(lineElemB.id(), lineElemB.layerId(), new com.leathercad.core.geometry.LineSegment(fRes.tB(), pB));
+        ArcElement newArc = new ArcElement(lineElemA.layerId(), fRes.arc());
 
         int idxA = elements.indexOf(lineElemA);
         if (idxA >= 0) elements.set(idxA, newA);
@@ -621,6 +730,7 @@ public class Document {
         elements.add(newArc);
         return true;
     }
+
 
     private Point2D getSelectionCenter() {
         double sumX = 0, sumY = 0;
@@ -673,6 +783,87 @@ public class Document {
             int index = elements.indexOf(lineElem);
             LineElement updated = new LineElement(lineElem.id(), lineElem.layerId(), new com.leathercad.core.geometry.LineSegment(s, e));
             elements.set(index, updated);
+        }
+    }
+
+    public void updateRectCorner(String id, int cornerIndex, Point2D newPoint) {
+        CADElement elem = findElementById(id);
+        if (elem instanceof RectElement rectElem) {
+            Layer layer = findLayerById(rectElem.layerId());
+            if (layer != null && (layer.isLocked() || !layer.isVisible())) return;
+
+            var r = rectElem.rect();
+            double x1 = r.minPoint().x();
+            double y1 = r.minPoint().y();
+            double x2 = x1 + r.width();
+            double y2 = y1 + r.height();
+
+            switch (cornerIndex) {
+                case 0 -> { x1 = newPoint.x(); y1 = newPoint.y(); }
+                case 1 -> { x2 = newPoint.x(); y1 = newPoint.y(); }
+                case 2 -> { x2 = newPoint.x(); y2 = newPoint.y(); }
+                case 3 -> { x1 = newPoint.x(); y2 = newPoint.y(); }
+            }
+
+            double minX = Math.min(x1, x2);
+            double minY = Math.min(y1, y2);
+            double w = Math.max(0.1, Math.abs(x2 - x1));
+            double h = Math.max(0.1, Math.abs(y2 - y1));
+
+            Rect2D newRect = new Rect2D(new Point2D(minX, minY), w, h, r.cornerRadius());
+            int index = elements.indexOf(rectElem);
+            elements.set(index, new RectElement(rectElem.id(), rectElem.layerId(), newRect));
+        }
+    }
+
+    public void updateCircleGrip(String id, int handleIndex, Point2D newPoint) {
+        CADElement elem = findElementById(id);
+        if (elem instanceof CircleElement circleElem) {
+            Layer layer = findLayerById(circleElem.layerId());
+            if (layer != null && (layer.isLocked() || !layer.isVisible())) return;
+
+            var c = circleElem.circle();
+            com.leathercad.core.geometry.Circle2D newCircle;
+            if (handleIndex == 0) {
+                newCircle = new com.leathercad.core.geometry.Circle2D(newPoint, c.radius());
+            } else {
+                double newR = Math.max(0.1, c.center().distanceTo(newPoint));
+                newCircle = new com.leathercad.core.geometry.Circle2D(c.center(), newR);
+            }
+
+            int index = elements.indexOf(circleElem);
+            elements.set(index, new CircleElement(circleElem.id(), circleElem.layerId(), newCircle));
+        }
+    }
+
+    public void updateArcGrip(String id, int handleIndex, Point2D newPoint) {
+        CADElement elem = findElementById(id);
+        if (elem instanceof ArcElement arcElem) {
+            Layer layer = findLayerById(arcElem.layerId());
+            if (layer != null && (layer.isLocked() || !layer.isVisible())) return;
+
+            var a = arcElem.arc();
+            com.leathercad.core.geometry.Arc2D newArc;
+            if (handleIndex == 0) {
+                newArc = new com.leathercad.core.geometry.Arc2D(newPoint, a.radius(), a.startAngleDegrees(), a.sweepAngleDegrees());
+            } else if (handleIndex == 1) {
+                double newR = Math.max(0.1, a.center().distanceTo(newPoint));
+                double newStart = Math.toDegrees(Math.atan2(newPoint.y() - a.center().y(), newPoint.x() - a.center().x()));
+                if (newStart < 0) newStart += 360;
+                newArc = new com.leathercad.core.geometry.Arc2D(a.center(), newR, newStart, a.sweepAngleDegrees());
+            } else {
+                double newR = Math.max(0.1, a.center().distanceTo(newPoint));
+                double endAngle = Math.toDegrees(Math.atan2(newPoint.y() - a.center().y(), newPoint.x() - a.center().x()));
+                if (endAngle < 0) endAngle += 360;
+                double start = a.startAngleDegrees() % 360;
+                if (start < 0) start += 360;
+                double sweep = endAngle - start;
+                while (sweep <= 0) sweep += 360;
+                newArc = new com.leathercad.core.geometry.Arc2D(a.center(), newR, a.startAngleDegrees(), sweep);
+            }
+
+            int index = elements.indexOf(arcElem);
+            elements.set(index, new ArcElement(arcElem.id(), arcElem.layerId(), newArc));
         }
     }
 

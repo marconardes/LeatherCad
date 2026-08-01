@@ -21,6 +21,7 @@ public class ToolManager {
         CADTool dimV = new DimensionTool(DimensionElement.DimensionType.VERTICAL);
         CADTool dimR = new DimensionTool(DimensionElement.DimensionType.RADIUS);
         CADTool stitchTool = new StitchTool();
+        CADTool filletTool = new FilletTool();
 
         tools.put(selectTool.getName(), selectTool);
         tools.put(lineTool.getName(), lineTool);
@@ -33,6 +34,7 @@ public class ToolManager {
         tools.put(dimV.getName(), dimV);
         tools.put(dimR.getName(), dimR);
         tools.put(stitchTool.getName(), stitchTool);
+        tools.put(filletTool.getName(), filletTool);
 
         activeTool = selectTool;
     }
