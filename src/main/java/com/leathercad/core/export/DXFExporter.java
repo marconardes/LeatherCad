@@ -97,6 +97,15 @@ public class DXFExporter {
                             sb.append(String.format(Locale.US, "10\n%.4f\n20\n%.4f\n", p.x(), p.y()));
                         }
                     }
+                } else if (elem instanceof DimensionElement dimElem) {
+                    Point2D s = dimElem.start();
+                    Point2D e = dimElem.end();
+                    appendLine(sb, layer.getName(), s.x(), s.y(), e.x(), e.y());
+                    sb.append("0\nTEXT\n");
+                    sb.append("8\n").append(layer.getName()).append("\n");
+                    sb.append(String.format(Locale.US, "10\n%.4f\n20\n%.4f\n30\n0.0\n", (s.x() + e.x()) / 2.0, (s.y() + e.y()) / 2.0));
+                    sb.append(String.format(Locale.US, "40\n%.4f\n", 2.5));
+                    sb.append("1\n").append(dimElem.formattedText()).append("\n");
                 }
             }
         }

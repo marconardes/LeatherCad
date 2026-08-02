@@ -134,4 +134,35 @@ public class BasicGeometryToolsTest {
         rectTool.onMousePressed(createDummyMouseEvent(MouseButton.PRIMARY, false), new Point2D(20, 20), document, camera);
         assertEquals(0, document.getElements().size());
     }
+
+    @Test
+    public void testDimensionToolLinearCreationAndFormattedText() {
+        Document doc = new Document();
+        DimensionTool dimTool = new DimensionTool(DimensionElement.DimensionType.LINEAR);
+        CameraTransform camera = new CameraTransform();
+
+        // 1º clique: P1 (0, 0)
+        dimTool.onMousePressed(createDummyMouseEvent(MouseButton.PRIMARY, false), new Point2D(0, 0), doc, camera);
+        // 2º clique: P2 (100, 0)
+        dimTool.onMousePressed(createDummyMouseEvent(MouseButton.PRIMARY, false), new Point2D(100, 0), doc, camera);
+        // 3º clique: Offset (50, 10)
+        dimTool.onMousePressed(createDummyMouseEvent(MouseButton.PRIMARY, false), new Point2D(50, 10), doc, camera);
+
+        assertEquals(1, doc.getElements().size());
+        assertTrue(doc.getElements().getFirst() instanceof DimensionElement);
+
+        DimensionElement dim = (DimensionElement) doc.getElements().getFirst();
+        assertEquals(DimensionElement.DimensionType.LINEAR, dim.type());
+        assertEquals("100.00 mm", dim.formattedText());
+        assertEquals(10.0, dim.offsetMm(), 1e-9);
+    }
+
+    @Test
+    public void testDimensionToolRadiusAndCalloutNote() {
+        DimensionElement dimRadius = new DimensionElement("layer1", new Point2D(0, 0), new Point2D(5.0, 0), DimensionElement.DimensionType.RADIUS, 5.0);
+        assertEquals("R 5.00 mm", dimRadius.formattedText());
+
+        DimensionElement dimCallout = new DimensionElement("layer1", new Point2D(0, 0), new Point2D(10, 10), DimensionElement.DimensionType.CALLOUT_NOTE, 0.0, "Couro Bovino 1.5mm");
+        assertEquals("Couro Bovino 1.5mm", dimCallout.formattedText());
+    }
 }

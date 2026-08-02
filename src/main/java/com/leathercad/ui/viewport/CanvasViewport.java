@@ -462,21 +462,131 @@ public class CanvasViewport extends Canvas {
                 gc.restore();
             }
         } else if (elem instanceof DimensionElement dimElem) {
-            Point2D s = camera.worldToScreen(dimElem.start());
-            Point2D e = camera.worldToScreen(dimElem.end());
-
-            gc.setStroke(isSelected ? Color.web("#FF0055") : Color.web("#00FF88"));
-            gc.setLineWidth(isSelected ? 2.5 : 1.2);
-            gc.setLineDashes(3.0);
-            gc.strokeLine(s.x(), s.y(), e.x(), e.y());
-            gc.setLineDashes(null);
-
-            gc.setFill(isSelected ? Color.web("#FF0055") : Color.web("#00FF88"));
-            gc.setFont(javafx.scene.text.Font.font("Consolas", 11));
-            double midX = (s.x() + e.x()) / 2.0;
-            double midY = (s.y() + e.y()) / 2.0 - 4;
-            gc.fillText(dimElem.formattedText(), midX, midY);
+            renderDimensionElement(gc, dimElem, isSelected);
         }
+    }
+
+    private void renderDimensionElement(GraphicsContext gc, DimensionElement dimElem, boolean isSelected) {
+        Color color = isSelected ? Color.web("#FF0055") : Color.web("#00E676");
+        gc.setStroke(color);
+        gc.setFill(color);
+        gc.setLineWidth(isSelected ? 2.0 : 1.2);
+
+        var type = dimElem.type();
+
+        if (type == DimensionElement.DimensionType.CALLOUT_NOTE) {
+            Point2D target = camera.worldToScreen(dimElem.start());
+            Point2D textPt = camera.worldToScreen(dimElem.end());
+
+            // Linha de chamada com apontador
+            gc.strokeLine(target.x(), target.y(), textPt.x(), textPt.y());
+            double angle = Math.atan2(target.y() - textPt.y(), target.x() - textPt.x());
+            drawArrowHead(gc, target, angle, color);
+
+            // Caixa de texto balão
+            String text = dimElem.formattedText();
+            gc.setFont(javafx.scene.text.Font.font("Segoe UI", 11));
+            double textW = text.length() * 7.0 + 16;
+            gc.setFill(Color.web("#1E1E1E", 0.90));
+            gc.fillRoundRect(textPt.x() - 4, textPt.y() - 14, textW, 22, 6, 6);
+            gc.setStroke(color);
+            gc.setLineWidth(1.0);
+            gc.strokeRoundRect(textPt.x() - 4, textPt.y() - 14, textW, 22, 6, 6);
+
+            gc.setFill(color);
+            gc.fillText(text, textPt.x() + 4, textPt.y() + 1);
+            return;
+        }
+
+        if (type == DimensionElement.DimensionType.RADIUS) {
+            Point2D center = camera.worldToScreen(dimElem.start());
+            Point2D border = camera.worldToScreen(dimElem.end());
+
+            gc.strokeLine(center.x(), center.y(), border.x(), border.y());
+            double angle = Math.atan2(border.y() - center.y(), border.x() - center.x());
+            drawArrowHead(gc, border, angle, color);
+
+            gc.setFont(javafx.scene.text.Font.font("Segoe UI", 11));
+            double midX = (center.x() + border.x()) / 2.0;
+            double midY = (center.y() + border.y()) / 2.0 - 4;
+            gc.fillText(dimElem.formattedText(), midX, midY);
+            return;
+        }
+
+        // Cota LINEAR / HORIZONTAL / VERTICAL / ANGULAR com linhas de chamada e setas
+        Point2D s = dimElem.start();
+        Point2D e = dimElem.end();
+
+        double dx = e.x() - s.x();
+        double dy = e.y() - s.y();
+        double len = Math.hypot(dx, dy);
+        if (len < 0.001) return;
+
+        double ux = dx / len;
+        double uy = dy / len;
+
+        double nx = -uy;
+        double ny = ux;
+
+        double offset = dimElem.offsetMm() != 0 ? dimElem.offsetMm() : 5.0;
+        Point2D sOffset = new Point2D(s.x() + nx * offset, s.y() + ny * offset);
+        Point2D eOffset = new Point2D(e.x() + nx * offset, e.y() + ny * offset);
+
+        Point2D sScreen = camera.worldToScreen(s);
+        Point2D eScreen = camera.worldToScreen(e);
+        Point2D sOffScreen = camera.worldToScreen(sOffset);
+        Point2D eOffScreen = camera.worldToScreen(eOffset);
+
+        // Linhas de chamada (extension lines)
+        gc.setLineWidth(0.8);
+        gc.strokeLine(sScreen.x(), sScreen.y(), sOffScreen.x(), sOffScreen.y());
+        gc.strokeLine(eScreen.x(), eScreen.y(), eOffScreen.x(), eOffScreen.y());
+
+        // Linha principal da cota
+        gc.setLineWidth(isSelected ? 2.0 : 1.2);
+        gc.strokeLine(sOffScreen.x(), sOffScreen.y(), eOffScreen.x(), eOffScreen.y());
+
+        // Setas nas extremidades
+        double arrowAngle1 = Math.atan2(sOffScreen.y() - eOffScreen.y(), sOffScreen.x() - eOffScreen.x());
+        double arrowAngle2 = Math.atan2(eOffScreen.y() - sOffScreen.y(), eOffScreen.x() - sOffScreen.x());
+        drawArrowHead(gc, sOffScreen, arrowAngle1, color);
+        drawArrowHead(gc, eOffScreen, arrowAngle2, color);
+
+        // Texto rotacionado e centralizado
+        gc.save();
+        double midX = (sOffScreen.x() + eOffScreen.x()) / 2.0;
+        double midY = (sOffScreen.y() + eOffScreen.y()) / 2.0;
+
+        double textAngleRad = Math.atan2(eOffScreen.y() - sOffScreen.y(), eOffScreen.x() - sOffScreen.x());
+        double textAngleDeg = Math.toDegrees(textAngleRad);
+        if (textAngleDeg > 90 || textAngleDeg < -90) {
+            textAngleDeg += 180;
+        }
+
+        gc.translate(midX, midY);
+        gc.rotate(textAngleDeg);
+
+        gc.setFont(javafx.scene.text.Font.font("Consolas", 11));
+        gc.setFill(color);
+        gc.fillText(dimElem.formattedText(), -20, -4);
+        gc.restore();
+    }
+
+    private void drawArrowHead(GraphicsContext gc, Point2D tip, double angleRad, Color color) {
+        double size = 8.0;
+        double halfWidth = 3.5;
+
+        double backX = tip.x() - Math.cos(angleRad) * size;
+        double backY = tip.y() - Math.sin(angleRad) * size;
+
+        double perpX = -Math.sin(angleRad) * halfWidth;
+        double perpY = Math.cos(angleRad) * halfWidth;
+
+        double[] px = { tip.x(), backX + perpX, backX - perpX };
+        double[] py = { tip.y(), backY + perpY, backY - perpY };
+
+        gc.setFill(color);
+        gc.fillPolygon(px, py, 3);
     }
 
     private void drawGeometryPathOnly(GraphicsContext gc, Layer layer, CADElement elem) {

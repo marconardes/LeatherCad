@@ -80,6 +80,7 @@ com/leathercad/core/materials/LeatherMaterial.class
 com/leathercad/core/leather/NotchElement$NotchType.class
 com/leathercad/core/production/AssemblyManual.class
 com/leathercad/ui/tools/CADTool.class
+com/leathercad/ui/CalloutNoteDialog.class
 com/leathercad/core/components/CoinPocketComponent.class
 com/leathercad/ui/NestingDialog.class
 com/leathercad/core/export/SVGExporter.class

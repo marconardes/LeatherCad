@@ -16,25 +16,35 @@ public record DimensionElement(
 ) implements CADElement {
 
     public enum DimensionType {
+        LINEAR,
+        RADIUS,
+        ANGULAR,
+        CALLOUT_NOTE,
+
+        // Aliases legados para retrocompatibilidade
         HORIZONTAL,
         VERTICAL,
-        RADIUS,
-        DIAMETER,
-        ANGULAR
+        DIAMETER
     }
 
     public DimensionElement(String layerId, Point2D start, Point2D end, DimensionType type, double offsetMm) {
         this(UUID.randomUUID().toString(), layerId, start, end, type, offsetMm, null);
     }
 
+    public DimensionElement(String layerId, Point2D start, Point2D end, DimensionType type, double offsetMm, String customLabel) {
+        this(UUID.randomUUID().toString(), layerId, start, end, type, offsetMm, customLabel);
+    }
+
     public String formattedText() {
         if (customLabel != null && !customLabel.isBlank()) return customLabel;
         return switch (type) {
-            case HORIZONTAL -> String.format("%.2f mm", Math.abs(end.x() - start.x()));
-            case VERTICAL -> String.format("%.2f mm", Math.abs(end.y() - start.y()));
-            case RADIUS -> String.format("R %.2f mm", start.distanceTo(end));
-            case DIAMETER -> String.format("Ø %.2f mm", start.distanceTo(end) * 2);
+            case LINEAR -> String.format(java.util.Locale.US, "%.2f mm", start.distanceTo(end));
+            case HORIZONTAL -> String.format(java.util.Locale.US, "%.2f mm", Math.abs(end.x() - start.x()));
+            case VERTICAL -> String.format(java.util.Locale.US, "%.2f mm", Math.abs(end.y() - start.y()));
+            case RADIUS -> String.format(java.util.Locale.US, "R %.2f mm", start.distanceTo(end));
+            case DIAMETER -> String.format(java.util.Locale.US, "Ø %.2f mm", start.distanceTo(end) * 2);
             case ANGULAR -> "45.00°";
+            case CALLOUT_NOTE -> "Nota Técnica";
         };
     }
 

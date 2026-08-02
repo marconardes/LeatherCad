@@ -17,6 +17,7 @@ public class ToolManager {
         CADTool arcTool = new ArcTool();
         CADTool bezierTool = new BezierTool();
         CADTool polylineTool = new PolylineTool();
+        CADTool dimTool = new DimensionTool(DimensionElement.DimensionType.LINEAR);
         CADTool dimH = new DimensionTool(DimensionElement.DimensionType.HORIZONTAL);
         CADTool dimV = new DimensionTool(DimensionElement.DimensionType.VERTICAL);
         CADTool dimR = new DimensionTool(DimensionElement.DimensionType.RADIUS);
@@ -31,6 +32,7 @@ public class ToolManager {
         tools.put(arcTool.getName(), arcTool);
         tools.put(bezierTool.getName(), bezierTool);
         tools.put(polylineTool.getName(), polylineTool);
+        tools.put(dimTool.getName(), dimTool);
         tools.put(dimH.getName(), dimH);
         tools.put(dimV.getName(), dimV);
         tools.put(dimR.getName(), dimR);

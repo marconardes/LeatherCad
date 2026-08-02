@@ -90,6 +90,13 @@ public class SVGExporter {
                     }
                     String tag = poly.isClosed() ? "polygon" : "polyline";
                     sb.append(String.format(Locale.US, "    <%s points=\"%s\" />\n", tag, pointsStr.toString().trim()));
+                } else if (elem instanceof DimensionElement dimElem) {
+                    Point2D s = dimElem.start();
+                    Point2D e = dimElem.end();
+                    sb.append(String.format(Locale.US, "    <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"#00E676\" stroke-width=\"0.5\" stroke-dasharray=\"2,2\" />\n",
+                        s.x(), s.y(), e.x(), e.y()));
+                    sb.append(String.format(Locale.US, "    <text x=\"%.2f\" y=\"%.2f\" font-family=\"Segoe UI, sans-serif\" font-size=\"3\" fill=\"#00E676\">%s</text>\n",
+                        (s.x() + e.x()) / 2.0, (s.y() + e.y()) / 2.0, dimElem.formattedText()));
                 }
             }
             sb.append("  </g>\n");

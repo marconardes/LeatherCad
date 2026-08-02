@@ -114,9 +114,30 @@ public class MainApp extends Application {
                 }
             }
 
-            // Atalhos específicos para a ferramenta StitchTool ativa
+            // Atalhos específicos para a ferramenta ativa quando não estiver digitando em campo de texto
             if (!(scene.getFocusOwner() instanceof javafx.scene.control.TextInputControl)) {
-                if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.StitchTool stitchTool) {
+                if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.DimensionTool dimTool) {
+                    switch (event.getCode()) {
+                        case D -> {
+                            dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.LINEAR);
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case R -> {
+                            dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.RADIUS);
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case T -> {
+                            dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.CALLOUT_NOTE);
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                    }
+                } else if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.StitchTool stitchTool) {
                     switch (event.getCode()) {
                         case R -> {
                             stitchTool.setStitchType(com.leathercad.core.leather.StitchType.ROUND_PUNCH);
@@ -816,7 +837,39 @@ public class MainApp extends Application {
 
         if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.StitchTool stitchTool) {
             contextToolBarContainer.getChildren().add(createStitchContextBar(stitchTool));
+        } else if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.DimensionTool dimTool) {
+            contextToolBarContainer.getChildren().add(createDimensionContextBar(dimTool));
         }
+    }
+
+    private HBox createDimensionContextBar(com.leathercad.ui.tools.DimensionTool dimTool) {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(4, 12, 4, 12));
+        bar.setStyle("-fx-background-color: #2D2D30; -fx-border-color: #3E3E42; -fx-border-width: 1 0 1 0;");
+
+        Label title = new Label("📐 Cotagem & Ficha Técnica:");
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #00E676; -fx-font-size: 12px;");
+
+        ComboBox<com.leathercad.core.model.DimensionElement.DimensionType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(
+            com.leathercad.core.model.DimensionElement.DimensionType.LINEAR,
+            com.leathercad.core.model.DimensionElement.DimensionType.RADIUS,
+            com.leathercad.core.model.DimensionElement.DimensionType.ANGULAR,
+            com.leathercad.core.model.DimensionElement.DimensionType.CALLOUT_NOTE
+        );
+        typeBox.setValue(dimTool.getCurrentType());
+        typeBox.setStyle("-fx-font-size: 11px; -fx-background-color: #3E3E42; -fx-text-fill: white;");
+        typeBox.setOnAction(e -> {
+            dimTool.setCurrentType(typeBox.getValue());
+            viewport.redraw();
+        });
+
+        Label hintLbl = new Label("(Atalhos: D=Linear, R=Raio, T=Nota Técnica)");
+        hintLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #888888;");
+
+        bar.getChildren().addAll(title, typeBox, new Separator(Orientation.VERTICAL), hintLbl);
+        return bar;
     }
 
     private HBox createStitchContextBar(com.leathercad.ui.tools.StitchTool stitchTool) {
