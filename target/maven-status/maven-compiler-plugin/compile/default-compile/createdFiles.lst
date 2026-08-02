@@ -22,6 +22,7 @@ com/leathercad/core/leather/StitchType.class
 com/leathercad/core/geometry/Arc2D$FilletResult.class
 com/leathercad/core/production/BOMItem.class
 com/leathercad/ui/tools/SelectTool.class
+com/leathercad/ui/StitchConfigDialog.class
 com/leathercad/core/geometry/Circle2D.class
 com/leathercad/core/geometry/LineSegment.class
 com/leathercad/ui/RealisticRenderDialog.class

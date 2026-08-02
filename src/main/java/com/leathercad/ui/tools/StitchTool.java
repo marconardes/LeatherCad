@@ -5,6 +5,7 @@ import com.leathercad.core.geometry.Point2D;
 import com.leathercad.core.geometry.Rect2D;
 import com.leathercad.core.leather.StitchConfig;
 import com.leathercad.core.leather.StitchElement;
+import com.leathercad.core.leather.StitchType;
 import com.leathercad.core.model.*;
 import com.leathercad.ui.viewport.CameraTransform;
 import javafx.scene.canvas.GraphicsContext;
@@ -21,8 +22,8 @@ import java.util.stream.Collectors;
 public class StitchTool implements CADTool {
     private Point2D startPoint = null;
     private Point2D currentHover = null;
-    private StitchConfig config = StitchConfig.DEFAULT_FRENCH;
-    private double offsetMm = 4.0;
+    private StitchConfig config = StitchConfig.DEFAULT;
+    private double offsetMm = 3.85;
 
     // Estado para seleções prévias no Document
     private final List<LineSegment> selectedStitchBaseLines = new ArrayList<>();
@@ -32,12 +33,49 @@ public class StitchTool implements CADTool {
     private CADElement hoveredElement = null;
     private CADElement previewOffsetElement = null;
 
+    public void setStitchType(StitchType newType) {
+        this.config = new StitchConfig(config.marginMm(), config.pitchMm(), config.holeDiameterMm(), config.slotLengthMm(), config.angleDegrees(), newType);
+    }
+
+    public void setPitchMm(double pitchMm) {
+        this.config = new StitchConfig(config.marginMm(), pitchMm, config.holeDiameterMm(), config.slotLengthMm(), config.angleDegrees(), config.type());
+    }
+
+    private static final double[] PITCH_PRESETS = {2.70, 3.00, 3.38, 3.85, 4.00, 5.00};
+
+    public void incrementPitch() {
+        double current = config.pitchMm();
+        for (double preset : PITCH_PRESETS) {
+            if (preset > current + 0.01) {
+                setPitchMm(preset);
+                return;
+            }
+        }
+        setPitchMm(PITCH_PRESETS[PITCH_PRESETS.length - 1]);
+    }
+
+    public void decrementPitch() {
+        double current = config.pitchMm();
+        for (int i = PITCH_PRESETS.length - 1; i >= 0; i--) {
+            if (PITCH_PRESETS[i] < current - 0.01) {
+                setPitchMm(PITCH_PRESETS[i]);
+                return;
+            }
+        }
+        setPitchMm(PITCH_PRESETS[0]);
+    }
+
     public void setConfig(StitchConfig config) {
         this.config = config;
     }
 
     public StitchConfig getConfig() {
         return config;
+    }
+
+    public void toggleAngle() {
+        double newAngle = (config.angleDegrees() < 0) ? 45.0 : -45.0;
+        this.config = new StitchConfig(config.marginMm(), config.pitchMm(), config.holeDiameterMm(), config.slotLengthMm(), newAngle, config.type());
     }
 
     public double getOffsetMm() {
@@ -227,22 +265,27 @@ public class StitchTool implements CADTool {
                 }
             }
 
-            // Preview das linhas de costura offsetadas
+            // Preview das linhas de costura offsetadas com furos/fendas
             gc.setStroke(Color.web("#FFD700"));
-            gc.setLineWidth(2.0);
-            gc.setLineDashes(5.0, 3.0);
+            gc.setLineWidth(1.5);
+            gc.setLineDashes(4.0, 2.0);
             for (LineSegment seg : selectedStitchBaseLines) {
                 Point2D s = camera.worldToScreen(seg.start());
                 Point2D e = camera.worldToScreen(seg.end());
                 gc.strokeLine(s.x(), s.y(), e.x(), e.y());
             }
             gc.setLineDashes(null);
+
+            for (LineSegment seg : selectedStitchBaseLines) {
+                renderPreviewStitch(gc, camera, seg);
+            }
             gc.restore();
 
-            String text = String.format("Costura Offset Seleção (%d): %.1f mm", selectedStitchBaseLines.size(), offsetMm);
+            String text = String.format("Costura Offset (%d) | %s %.2fmm (Margem: %.1fmm)", 
+                selectedStitchBaseLines.size(), config.type().name(), config.pitchMm(), offsetMm);
             gc.setFont(Font.font("Segoe UI", 12));
             gc.setFill(Color.web("#1E1E1E", 0.85));
-            gc.fillRoundRect(mouseScreen.x() + 14, mouseScreen.y() - 22, 230, 24, 6, 6);
+            gc.fillRoundRect(mouseScreen.x() + 14, mouseScreen.y() - 22, 310, 24, 6, 6);
             gc.setFill(Color.web("#FFD700"));
             gc.fillText(text, mouseScreen.x() + 20, mouseScreen.y() - 6);
             return;
@@ -253,8 +296,8 @@ public class StitchTool implements CADTool {
             List<LineSegment> segs = extractLineSegments(previewOffsetElement);
 
             gc.setStroke(Color.web("#FFD700"));
-            gc.setLineWidth(2.0);
-            gc.setLineDashes(5.0, 3.0);
+            gc.setLineWidth(1.5);
+            gc.setLineDashes(4.0, 2.0);
             for (LineSegment seg : segs) {
                 Point2D s = camera.worldToScreen(seg.start());
                 Point2D e = camera.worldToScreen(seg.end());
@@ -262,10 +305,15 @@ public class StitchTool implements CADTool {
             }
             gc.setLineDashes(null);
 
-            String text = String.format("Costura Offset: %.1f mm", offsetMm);
+            for (LineSegment seg : segs) {
+                renderPreviewStitch(gc, camera, seg);
+            }
+
+            String text = String.format("Costura | %s %.2fmm (Margem: %.1fmm)", 
+                config.type().name(), config.pitchMm(), offsetMm);
             gc.setFont(Font.font("Segoe UI", 12));
             gc.setFill(Color.web("#1E1E1E", 0.85));
-            gc.fillRoundRect(mouseScreen.x() + 14, mouseScreen.y() - 22, 140, 24, 6, 6);
+            gc.fillRoundRect(mouseScreen.x() + 14, mouseScreen.y() - 22, 280, 24, 6, 6);
             gc.setFill(Color.web("#FFD700"));
             gc.fillText(text, mouseScreen.x() + 20, mouseScreen.y() - 6);
             return;
@@ -277,10 +325,44 @@ public class StitchTool implements CADTool {
             Point2D e = camera.worldToScreen(currentHover);
 
             gc.setStroke(Color.web("#FFD700"));
-            gc.setLineWidth(1.5);
+            gc.setLineWidth(1.2);
             gc.setLineDashes(4.0);
             gc.strokeLine(s.x(), s.y(), e.x(), e.y());
             gc.setLineDashes(null);
+
+            LineSegment seg = new LineSegment(startPoint, currentHover);
+            renderPreviewStitch(gc, camera, seg);
+        }
+    }
+
+    private void renderPreviewStitch(GraphicsContext gc, CameraTransform camera, LineSegment seg) {
+        if (seg.length() < 0.1) return;
+        gc.setStroke(Color.web("#FFD700"));
+        gc.setFill(Color.web("#FFD700"));
+
+        if (config.type() == com.leathercad.core.leather.StitchType.MACHINE_STITCH) {
+            gc.setLineWidth(1.5);
+            gc.setLineDashes(5.0, 3.0);
+            Point2D s = camera.worldToScreen(seg.start());
+            Point2D e = camera.worldToScreen(seg.end());
+            gc.strokeLine(s.x(), s.y(), e.x(), e.y());
+            gc.setLineDashes(null);
+        } else if (config.type() == com.leathercad.core.leather.StitchType.ROUND_PUNCH || config.type() == com.leathercad.core.leather.StitchType.ROUND) {
+            var holes = com.leathercad.core.leather.StitchEngine.calculateStitchHoles(seg, config);
+            for (Point2D hole : holes) {
+                Point2D p = camera.worldToScreen(hole);
+                double hr = Math.max(1.5, camera.worldToScreenLength(config.holeDiameterMm() / 2.0));
+                gc.strokeOval(p.x() - hr, p.y() - hr, hr * 2, hr * 2);
+            }
+        } else {
+            // FRENCH_SLANT / DEFAULT
+            var slots = com.leathercad.core.leather.StitchEngine.calculateSlantSlots(seg, config);
+            gc.setLineWidth(2.0);
+            for (var slot : slots) {
+                Point2D s1 = camera.worldToScreen(slot.start());
+                Point2D s2 = camera.worldToScreen(slot.end());
+                gc.strokeLine(s1.x(), s1.y(), s2.x(), s2.y());
+            }
         }
     }
 

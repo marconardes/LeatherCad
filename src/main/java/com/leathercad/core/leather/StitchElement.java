@@ -67,6 +67,10 @@ public record StitchElement(
         return new StitchElement(id, layerId, newBase, config, StitchEngine.calculateStitchHoles(newBase, config));
     }
 
+    public List<LineSegment> calculateSlantSlots() {
+        return StitchEngine.calculateSlantSlotsForHoles(holePoints, baseLine.start(), baseLine.end(), config);
+    }
+
     @Override
     public CADElement copyWithNewId() {
         return new StitchElement(UUID.randomUUID().toString(), layerId, baseLine, config, StitchEngine.calculateStitchHoles(baseLine, config));

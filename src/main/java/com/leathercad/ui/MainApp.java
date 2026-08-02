@@ -8,6 +8,7 @@ import com.leathercad.ui.tools.ToolManager;
 import com.leathercad.ui.viewport.CanvasViewport;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,6 +31,7 @@ public class MainApp extends Application {
     private Stage primaryStage;
     private Label statusLabel;
     private Label zoomLabel;
+    private VBox contextToolBarContainer;
 
     private File currentProjectFile = null;
 
@@ -42,10 +44,11 @@ public class MainApp extends Application {
 
         BorderPane root = new BorderPane();
 
-        // Top Menu & Toolbar
+        // Top Menu & Toolbar & Context HUD Bar
         MenuBar menuBar = createMenuBar(primaryStage);
         ToolBar toolBar = createToolBar();
-        VBox topContainer = new VBox(menuBar, toolBar);
+        contextToolBarContainer = new VBox();
+        VBox topContainer = new VBox(menuBar, toolBar, contextToolBarContainer);
         root.setTop(topContainer);
 
         // Center Canvas Viewport
@@ -110,6 +113,45 @@ public class MainApp extends Application {
                     }
                 }
             }
+
+            // Atalhos específicos para a ferramenta StitchTool ativa
+            if (!(scene.getFocusOwner() instanceof javafx.scene.control.TextInputControl)) {
+                if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.StitchTool stitchTool) {
+                    switch (event.getCode()) {
+                        case R -> {
+                            stitchTool.setStitchType(com.leathercad.core.leather.StitchType.ROUND_PUNCH);
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case F -> {
+                            stitchTool.setStitchType(com.leathercad.core.leather.StitchType.FRENCH_SLANT);
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case S -> {
+                            stitchTool.toggleAngle();
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case PLUS, ADD, EQUALS -> {
+                            stitchTool.incrementPitch();
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                        case MINUS, SUBTRACT -> {
+                            stitchTool.decrementPitch();
+                            updateContextToolBar();
+                            viewport.redraw();
+                            return;
+                        }
+                    }
+                }
+            }
+
             switch (event.getCode()) {
                 case DELETE, BACK_SPACE -> {
                     document.deleteSelected();
@@ -117,6 +159,7 @@ public class MainApp extends Application {
                 }
                 case ESCAPE -> {
                     toolManager.resetActiveTool();
+                    updateContextToolBar();
                     document.clearSelection();
                     viewport.redraw();
                 }
@@ -197,6 +240,9 @@ public class MainApp extends Application {
         MenuItem filletToolItem = new MenuItem("📐 Arredondamento de Cantos (Fillet)...");
         filletToolItem.setOnAction(e -> CornerRadiusDialog.showDialog(primaryStage, document, viewport, toolManager, 5.0));
 
+        MenuItem stitchCfgItem = new MenuItem("🧵 Configuração de Costura / Garfo (Chisel)...");
+        stitchCfgItem.setOnAction(e -> StitchConfigDialog.showDialog(primaryStage, toolManager, viewport));
+
         MenuItem offsetToolItem = new MenuItem("✂️ Margem de Costura / Offset...");
         offsetToolItem.setOnAction(e -> toolManager.setActiveTool("Margem de Costura / Offset"));
 
@@ -227,7 +273,7 @@ public class MainApp extends Application {
             viewport.redraw();
         });
 
-        leatherMenu.getItems().addAll(filletToolItem, offsetToolItem, new SeparatorMenuItem(), r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
+        leatherMenu.getItems().addAll(stitchCfgItem, filletToolItem, offsetToolItem, new SeparatorMenuItem(), r3Item, r5Item, r8Item, r10Item, new SeparatorMenuItem(), creaseItem);
 
         Menu compMenu = new Menu("Componentes");
         MenuItem cardSlotItem = new MenuItem("💳 Porta-Cartão (95x55mm)");
@@ -476,40 +522,40 @@ public class MainApp extends Application {
 
         ToggleButton selectBtn = CADIconFactory.createIconToggleButton(IconType.SELECT, "Ferramenta de Seleção & Edição de Nós (S)", toolGroup);
         selectBtn.setSelected(true);
-        selectBtn.setOnAction(e -> toolManager.setActiveTool("Seleção"));
+        selectBtn.setOnAction(e -> selectTool("Seleção"));
 
         ToggleButton lineBtn = CADIconFactory.createIconToggleButton(IconType.LINE, "Desenhar Segmento de Reta (L)", toolGroup);
-        lineBtn.setOnAction(e -> toolManager.setActiveTool("Linha"));
+        lineBtn.setOnAction(e -> selectTool("Linha"));
 
         ToggleButton rectBtn = CADIconFactory.createIconToggleButton(IconType.RECTANGLE, "Desenhar Retângulo de Couro (R)", toolGroup);
-        rectBtn.setOnAction(e -> toolManager.setActiveTool("Retângulo"));
+        rectBtn.setOnAction(e -> selectTool("Retângulo"));
 
         ToggleButton circleBtn = CADIconFactory.createIconToggleButton(IconType.CIRCLE, "Desenhar Círculo / Furo (C)", toolGroup);
-        circleBtn.setOnAction(e -> toolManager.setActiveTool("Círculo"));
+        circleBtn.setOnAction(e -> selectTool("Círculo"));
 
         ToggleButton polylineBtn = CADIconFactory.createIconToggleButton(IconType.POLYLINE, "Desenhar Polilinha / Molde Irregular (P)", toolGroup);
-        polylineBtn.setOnAction(e -> toolManager.setActiveTool("Polilinha"));
+        polylineBtn.setOnAction(e -> selectTool("Polilinha"));
 
         ToggleButton arcBtn = CADIconFactory.createIconToggleButton(IconType.ARC, "Desenhar Arco Circular (A)", toolGroup);
-        arcBtn.setOnAction(e -> toolManager.setActiveTool("Arco"));
+        arcBtn.setOnAction(e -> selectTool("Arco"));
 
         ToggleButton bezierBtn = CADIconFactory.createIconToggleButton(IconType.BEZIER, "Desenhar Curva Bézier (B)", toolGroup);
-        bezierBtn.setOnAction(e -> toolManager.setActiveTool("Curva Bézier"));
+        bezierBtn.setOnAction(e -> selectTool("Curva Bézier"));
 
         ToggleButton stitchBtn = CADIconFactory.createIconToggleButton(IconType.STITCH, "Costura Parametrizada de Couro (Chisel)", toolGroup);
-        stitchBtn.setOnAction(e -> toolManager.setActiveTool("Costura Parametrizada"));
+        stitchBtn.setOnAction(e -> selectTool("Costura Parametrizada"));
 
         ToggleButton offsetBtn = CADIconFactory.createIconToggleButton(IconType.OFFSET, "Margem de Costura / Offset Paralelo (O)", toolGroup);
-        offsetBtn.setOnAction(e -> toolManager.setActiveTool("Margem de Costura / Offset"));
+        offsetBtn.setOnAction(e -> selectTool("Margem de Costura / Offset"));
 
         ToggleButton dimHBtn = CADIconFactory.createIconToggleButton(IconType.DIM_HORIZONTAL, "Cota Horizontal", toolGroup);
-        dimHBtn.setOnAction(e -> toolManager.setActiveTool("Cota Horizontal"));
+        dimHBtn.setOnAction(e -> selectTool("Cota Horizontal"));
 
         ToggleButton dimVBtn = CADIconFactory.createIconToggleButton(IconType.DIM_VERTICAL, "Cota Vertical", toolGroup);
-        dimVBtn.setOnAction(e -> toolManager.setActiveTool("Cota Vertical"));
+        dimVBtn.setOnAction(e -> selectTool("Cota Vertical"));
 
         ToggleButton dimRBtn = CADIconFactory.createIconToggleButton(IconType.DIM_RADIUS, "Cota Raio", toolGroup);
-        dimRBtn.setOnAction(e -> toolManager.setActiveTool("Cota Raio"));
+        dimRBtn.setOnAction(e -> selectTool("Cota Raio"));
 
         Button moveBtn = CADIconFactory.createIconButton(IconType.MOVE, "Mover Elementos Selecionados");
         moveBtn.setOnAction(e -> { document.moveSelected(10.0, 10.0); viewport.redraw(); });
@@ -757,6 +803,119 @@ public class MainApp extends Application {
 
         bar.getChildren().addAll(statusLabel, spacer, zoomLabel);
         return bar;
+    }
+
+    private void selectTool(String toolName) {
+        toolManager.setActiveTool(toolName);
+        updateContextToolBar();
+    }
+
+    public void updateContextToolBar() {
+        if (contextToolBarContainer == null) return;
+        contextToolBarContainer.getChildren().clear();
+
+        if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.StitchTool stitchTool) {
+            contextToolBarContainer.getChildren().add(createStitchContextBar(stitchTool));
+        }
+    }
+
+    private HBox createStitchContextBar(com.leathercad.ui.tools.StitchTool stitchTool) {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(4, 12, 4, 12));
+        bar.setStyle("-fx-background-color: #2D2D30; -fx-border-color: #3E3E42; -fx-border-width: 1 0 1 0;");
+
+        Label title = new Label("🧵 Costura:");
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-size: 12px;");
+
+        // 1. Tipo ComboBox
+        ComboBox<com.leathercad.core.leather.StitchType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(
+            com.leathercad.core.leather.StitchType.FRENCH_SLANT,
+            com.leathercad.core.leather.StitchType.ROUND_PUNCH,
+            com.leathercad.core.leather.StitchType.MACHINE_STITCH
+        );
+        var curType = stitchTool.getConfig().type();
+        typeBox.setValue(curType == com.leathercad.core.leather.StitchType.FRENCH || curType == com.leathercad.core.leather.StitchType.EUROPEAN ? com.leathercad.core.leather.StitchType.FRENCH_SLANT : curType);
+        typeBox.setStyle("-fx-font-size: 11px; -fx-background-color: #3E3E42; -fx-text-fill: white;");
+        typeBox.setOnAction(e -> {
+            stitchTool.setStitchType(typeBox.getValue());
+            viewport.redraw();
+        });
+
+        // 2. Pitch Presets ComboBox
+        ComboBox<String> pitchBox = new ComboBox<>();
+        pitchBox.getItems().addAll("#10 (2.70mm)", "#9 (3.00mm)", "#8 (3.38mm)", "#7 (3.85mm)", "4.00mm", "5.00mm");
+        pitchBox.setValue(getPitchPresetLabel(stitchTool.getConfig().pitchMm()));
+        pitchBox.setStyle("-fx-font-size: 11px; -fx-background-color: #3E3E42; -fx-text-fill: white;");
+        pitchBox.setOnAction(e -> {
+            double p = parsePitchPreset(pitchBox.getValue());
+            stitchTool.setPitchMm(p);
+            viewport.redraw();
+        });
+
+        // 3. Toggle Angle Button (+45° / -45°)
+        ToggleButton angleBtn = new ToggleButton(stitchTool.getConfig().angleDegrees() < 0 ? "📐 -45°" : "📐 +45°");
+        angleBtn.setSelected(stitchTool.getConfig().angleDegrees() < 0);
+        angleBtn.setStyle("-fx-font-size: 11px; -fx-background-color: #3E3E42; -fx-text-fill: white; -fx-cursor: hand;");
+        angleBtn.setOnAction(e -> {
+            stitchTool.toggleAngle();
+            angleBtn.setText(stitchTool.getConfig().angleDegrees() < 0 ? "📐 -45°" : "📐 +45°");
+            viewport.redraw();
+        });
+
+        // 4. Margem (Offset) Spinner
+        Label offsetLbl = new Label("Margem:");
+        offsetLbl.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 11px;");
+        Spinner<Double> offsetSpn = new Spinner<>(0.0, 50.0, stitchTool.getOffsetMm(), 0.25);
+        offsetSpn.setEditable(true);
+        offsetSpn.setPrefWidth(85);
+        offsetSpn.valueProperty().addListener((obs, oldV, newV) -> {
+            if (newV != null) {
+                stitchTool.setOffsetMm(newV);
+                viewport.redraw();
+            }
+        });
+
+        // 5. Botão Configurações Avançadas
+        Button configBtn = new Button("⚙️ Opções...");
+        configBtn.setStyle("-fx-font-size: 11px; -fx-background-color: #007ACC; -fx-text-fill: white; -fx-cursor: hand;");
+        configBtn.setOnAction(e -> {
+            StitchConfigDialog.showDialog(primaryStage, toolManager, viewport);
+            typeBox.setValue(stitchTool.getConfig().type());
+            pitchBox.setValue(getPitchPresetLabel(stitchTool.getConfig().pitchMm()));
+            angleBtn.setText(stitchTool.getConfig().angleDegrees() < 0 ? "📐 -45°" : "📐 +45°");
+            offsetSpn.getValueFactory().setValue(stitchTool.getOffsetMm());
+            viewport.redraw();
+        });
+
+        // 6. Atalhos Dica
+        Label hintLbl = new Label("(Atalhos: R=Vazador, F=Francês, S=Inverter Ângulo, +/-=Pitch)");
+        hintLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #888888;");
+
+        bar.getChildren().addAll(title, typeBox, pitchBox, angleBtn, offsetLbl, offsetSpn, configBtn, new Separator(javafx.geometry.Orientation.VERTICAL), hintLbl);
+        return bar;
+    }
+
+    private String getPitchPresetLabel(double pitch) {
+        if (Math.abs(pitch - 2.70) < 0.05) return "#10 (2.70mm)";
+        if (Math.abs(pitch - 3.00) < 0.05) return "#9 (3.00mm)";
+        if (Math.abs(pitch - 3.38) < 0.05) return "#8 (3.38mm)";
+        if (Math.abs(pitch - 3.85) < 0.05) return "#7 (3.85mm)";
+        if (Math.abs(pitch - 4.00) < 0.05) return "4.00mm";
+        if (Math.abs(pitch - 5.00) < 0.05) return "5.00mm";
+        return String.format(java.util.Locale.US, "%.2fmm", pitch);
+    }
+
+    private double parsePitchPreset(String val) {
+        if (val == null) return 3.85;
+        if (val.contains("2.70")) return 2.70;
+        if (val.contains("3.00")) return 3.00;
+        if (val.contains("3.38")) return 3.38;
+        if (val.contains("3.85")) return 3.85;
+        if (val.contains("4.00")) return 4.00;
+        if (val.contains("5.00")) return 5.00;
+        return 3.85;
     }
 
     public static void main(String[] args) {

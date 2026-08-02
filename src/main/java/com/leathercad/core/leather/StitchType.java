@@ -7,7 +7,12 @@ package com.leathercad.core.leather;
  * - ROUND: Furo circular (Round Hole Punch)
  */
 public enum StitchType {
-    FRENCH("Francesa (Pricking Iron 45°)"),
+    FRENCH_SLANT("Francesa / Diamante (45°)"),
+    ROUND_PUNCH("Vazador Redondo"),
+    MACHINE_STITCH("Linha de Máquina"),
+
+    // Aliases legados para retrocompatibilidade
+    FRENCH("Francesa / Diamante (45°)"),
     EUROPEAN("Europeia (Diamond Chisel)"),
     ROUND("Furo Redondo (Round Punch)");
 

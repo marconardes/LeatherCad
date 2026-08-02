@@ -11,17 +11,37 @@ import javafx.scene.paint.Stop;
 public class RealisticStitchRenderer {
 
     public static void render3DStitches(GraphicsContext gc, StitchElement stitch, double scale, double offsetX, double offsetY) {
-        // Renderiza buracos de furação (chisel hole depth)
-        for (Point2D hole : stitch.holePoints()) {
-            double hx = hole.x() * scale + offsetX;
-            double hy = hole.y() * scale + offsetY;
-            double r = Math.max(2.0, (stitch.config().holeDiameterMm() * scale) / 2.0);
+        // Renderiza furações (chisel hole / slant slot depth)
+        var cfg = stitch.config();
+        if (cfg.type() == com.leathercad.core.leather.StitchType.ROUND_PUNCH || cfg.type() == com.leathercad.core.leather.StitchType.ROUND) {
+            for (Point2D hole : stitch.holePoints()) {
+                double hx = hole.x() * scale + offsetX;
+                double hy = hole.y() * scale + offsetY;
+                double r = Math.max(2.0, (cfg.holeDiameterMm() * scale) / 2.0);
 
-            gc.setFill(Color.web("#111111", 0.85));
-            gc.fillOval(hx - r, hy - r, r * 2.0, r * 2.0);
-            gc.setStroke(Color.web("#333333"));
-            gc.setLineWidth(0.8);
-            gc.strokeOval(hx - r, hy - r, r * 2.0, r * 2.0);
+                gc.setFill(Color.web("#111111", 0.85));
+                gc.fillOval(hx - r, hy - r, r * 2.0, r * 2.0);
+                gc.setStroke(Color.web("#333333"));
+                gc.setLineWidth(0.8);
+                gc.strokeOval(hx - r, hy - r, r * 2.0, r * 2.0);
+            }
+        } else if (cfg.type() != com.leathercad.core.leather.StitchType.MACHINE_STITCH) {
+            // FRENCH_SLANT / DEFAULT
+            var slots = stitch.calculateSlantSlots();
+            for (var slot : slots) {
+                double s1x = slot.start().x() * scale + offsetX;
+                double s1y = slot.start().y() * scale + offsetY;
+                double s2x = slot.end().x() * scale + offsetX;
+                double s2y = slot.end().y() * scale + offsetY;
+
+                gc.setStroke(Color.web("#111111", 0.90));
+                gc.setLineWidth(Math.max(2.0, 2.5 * scale));
+                gc.strokeLine(s1x, s1y, s2x, s2y);
+
+                gc.setStroke(Color.web("#333333", 0.70));
+                gc.setLineWidth(0.8);
+                gc.strokeLine(s1x, s1y, s2x, s2y);
+            }
         }
 
         // Renderiza cada ponto de costura 3D com brilho especular de fio encerado

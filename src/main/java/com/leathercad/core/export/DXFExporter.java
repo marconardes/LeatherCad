@@ -62,11 +62,24 @@ public class DXFExporter {
                     sb.append(String.format(Locale.US, "10\n%.4f\n20\n%.4f\n30\n0.0\n", c.x(), c.y()));
                     sb.append(String.format(Locale.US, "40\n%.4f\n", circleElem.circle().radius()));
                 } else if (elem instanceof com.leathercad.core.leather.StitchElement stitchElem) {
-                    for (Point2D hole : stitchElem.holePoints()) {
-                        sb.append("0\nCIRCLE\n");
-                        sb.append("8\n").append(layer.getName()).append("\n");
-                        sb.append(String.format(Locale.US, "10\n%.4f\n20\n%.4f\n30\n0.0\n", hole.x(), hole.y()));
-                        sb.append(String.format(Locale.US, "40\n%.4f\n", stitchElem.config().holeDiameterMm() / 2.0));
+                    var cfg = stitchElem.config();
+                    if (cfg.type() == com.leathercad.core.leather.StitchType.MACHINE_STITCH) {
+                        Point2D s = stitchElem.baseLine().start();
+                        Point2D e = stitchElem.baseLine().end();
+                        appendLine(sb, layer.getName(), s.x(), s.y(), e.x(), e.y());
+                    } else if (cfg.type() == com.leathercad.core.leather.StitchType.ROUND_PUNCH || cfg.type() == com.leathercad.core.leather.StitchType.ROUND) {
+                        for (Point2D hole : stitchElem.holePoints()) {
+                            sb.append("0\nCIRCLE\n");
+                            sb.append("8\n").append(layer.getName()).append("\n");
+                            sb.append(String.format(Locale.US, "10\n%.4f\n20\n%.4f\n30\n0.0\n", hole.x(), hole.y()));
+                            sb.append(String.format(Locale.US, "40\n%.4f\n", cfg.holeDiameterMm() / 2.0));
+                        }
+                    } else {
+                        // FRENCH_SLANT / DEFAULT
+                        var slots = stitchElem.calculateSlantSlots();
+                        for (var slot : slots) {
+                            appendLine(sb, layer.getName(), slot.start().x(), slot.start().y(), slot.end().x(), slot.end().y());
+                        }
                     }
                 } else if (elem instanceof com.leathercad.core.leather.CreaseElement creaseElem) {
                     Point2D s = creaseElem.line().start();

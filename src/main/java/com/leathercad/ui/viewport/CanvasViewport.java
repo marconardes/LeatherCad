@@ -353,18 +353,45 @@ public class CanvasViewport extends Canvas {
             Color stitchColor = isSelected ? Color.web("#FF0055") : Color.web("#FFD700");
             gc.setStroke(stitchColor);
             gc.setFill(stitchColor);
-            gc.setLineWidth(isSelected ? 2.5 : 1.2);
-            gc.setLineDashes(4.0);
 
-            Point2D s = camera.worldToScreen(stitchElem.baseLine().start());
-            Point2D e = camera.worldToScreen(stitchElem.baseLine().end());
-            gc.strokeLine(s.x(), s.y(), e.x(), e.y());
-            gc.setLineDashes(null);
+            com.leathercad.core.leather.StitchType type = stitchElem.config().type();
 
-            for (Point2D hole : stitchElem.holePoints()) {
-                Point2D p = camera.worldToScreen(hole);
-                double hr = Math.max(1.5, camera.worldToScreenLength(stitchElem.config().holeDiameterMm() / 2.0));
-                gc.fillOval(p.x() - hr, p.y() - hr, hr * 2, hr * 2);
+            if (type == com.leathercad.core.leather.StitchType.MACHINE_STITCH) {
+                gc.setLineWidth(isSelected ? 2.5 : 1.5);
+                gc.setLineDashes(6.0, 4.0);
+                Point2D s = camera.worldToScreen(stitchElem.baseLine().start());
+                Point2D e = camera.worldToScreen(stitchElem.baseLine().end());
+                gc.strokeLine(s.x(), s.y(), e.x(), e.y());
+                gc.setLineDashes(null);
+            } else if (type == com.leathercad.core.leather.StitchType.ROUND_PUNCH || type == com.leathercad.core.leather.StitchType.ROUND) {
+                gc.setLineWidth(isSelected ? 2.0 : 1.0);
+                gc.setLineDashes(3.0, 3.0);
+                Point2D s = camera.worldToScreen(stitchElem.baseLine().start());
+                Point2D e = camera.worldToScreen(stitchElem.baseLine().end());
+                gc.strokeLine(s.x(), s.y(), e.x(), e.y());
+                gc.setLineDashes(null);
+
+                for (Point2D hole : stitchElem.holePoints()) {
+                    Point2D p = camera.worldToScreen(hole);
+                    double hr = Math.max(1.5, camera.worldToScreenLength(stitchElem.config().holeDiameterMm() / 2.0));
+                    gc.strokeOval(p.x() - hr, p.y() - hr, hr * 2, hr * 2);
+                }
+            } else {
+                // FRENCH_SLANT / DEFAULT
+                gc.setLineWidth(isSelected ? 1.5 : 1.0);
+                gc.setLineDashes(3.0, 3.0);
+                Point2D s = camera.worldToScreen(stitchElem.baseLine().start());
+                Point2D e = camera.worldToScreen(stitchElem.baseLine().end());
+                gc.strokeLine(s.x(), s.y(), e.x(), e.y());
+                gc.setLineDashes(null);
+
+                gc.setLineWidth(isSelected ? 2.5 : 1.8);
+                var slots = stitchElem.calculateSlantSlots();
+                for (var slot : slots) {
+                    Point2D s1 = camera.worldToScreen(slot.start());
+                    Point2D s2 = camera.worldToScreen(slot.end());
+                    gc.strokeLine(s1.x(), s1.y(), s2.x(), s2.y());
+                }
             }
         } else if (elem instanceof CircleElement circleElem) {
             Point2D c = camera.worldToScreen(circleElem.circle().center());
