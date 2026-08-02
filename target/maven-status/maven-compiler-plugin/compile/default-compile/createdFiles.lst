@@ -13,6 +13,7 @@ com/leathercad/core/ai/AIPromptPreset.class
 com/leathercad/core/export/PNGExporter.class
 com/leathercad/core/parametric/Variable.class
 com/leathercad/ui/MaterialManagerDialog.class
+com/leathercad/ui/ExportDialog.class
 com/leathercad/core/model/DimensionElement$DimensionType.class
 com/leathercad/core/render/RealisticHardwareRenderer$MetalFinish.class
 com/leathercad/ui/tools/DimensionTool.class
@@ -83,6 +84,7 @@ com/leathercad/ui/tools/CADTool.class
 com/leathercad/ui/CalloutNoteDialog.class
 com/leathercad/core/components/CoinPocketComponent.class
 com/leathercad/ui/NestingDialog.class
+com/leathercad/ui/ExportDialog$ExportFormat.class
 com/leathercad/core/export/SVGExporter.class
 com/leathercad/core/leather/SkivingElement.class
 com/leathercad/core/production/AssemblyStep.class

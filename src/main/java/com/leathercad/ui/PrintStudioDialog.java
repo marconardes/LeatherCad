@@ -138,13 +138,13 @@ public class PrintStudioDialog {
             }
         });
 
-        Button pdfBtn = new Button("📄 Exportar Gabarito Multi-Páginas (PDF/TXT)");
+        Button pdfBtn = new Button("📄 Exportar Gabarito Multi-Páginas 1:1 (PDF)");
         pdfBtn.setStyle("-fx-background-color: #2ED573; -fx-text-fill: white; -fx-font-weight: bold;");
         pdfBtn.setOnAction(e -> {
             try {
-                File file = new File("leathercad_moldes_1to1.txt");
-                PrintPDFExporter.exportMultiPageReport(document, currentPaper, marginMm, overlapMm, file);
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Gabarito multi-páginas exportado com sucesso em: " + file.getAbsolutePath());
+                File file = new File("leathercad_moldes_1to1.pdf");
+                PrintPDFExporter.exportMultiPagePDF(document, currentPaper, marginMm, overlapMm, file);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Gabarito multi-páginas 1:1 exportado com sucesso em: " + file.getAbsolutePath());
                 alert.show();
             } catch (Exception ex) {
                 ex.printStackTrace();

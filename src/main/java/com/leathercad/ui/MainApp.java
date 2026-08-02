@@ -213,19 +213,22 @@ public class MainApp extends Application {
         MenuItem saveAsItem = new MenuItem("💾 Salvar Como... (Ctrl+Shift+S)");
         saveAsItem.setOnAction(e -> saveProjectAs());
 
+        MenuItem exportDialogItem = new MenuItem("📦 Exportar Moldes... (PDF / DXF / SVG / PNG)");
+        exportDialogItem.setOnAction(e -> ExportDialog.showDialog(stage, document));
+
         MenuItem exportSvg = new MenuItem("Exportar SVG...");
-        exportSvg.setOnAction(e -> exportFile("svg"));
+        exportSvg.setOnAction(e -> ExportDialog.showDialog(stage, document));
 
         MenuItem exportDxf = new MenuItem("Exportar DXF (AutoCAD R12)...");
-        exportDxf.setOnAction(e -> exportFile("dxf"));
+        exportDxf.setOnAction(e -> ExportDialog.showDialog(stage, document));
 
-        MenuItem exportPdf = new MenuItem("Exportar PDF...");
-        exportPdf.setOnAction(e -> exportFile("pdf"));
+        MenuItem exportPdf = new MenuItem("Exportar PDF 1:1...");
+        exportPdf.setOnAction(e -> ExportDialog.showDialog(stage, document));
 
         MenuItem exportPng = new MenuItem("Exportar PNG...");
-        exportPng.setOnAction(e -> exportFile("png"));
+        exportPng.setOnAction(e -> ExportDialog.showDialog(stage, document));
 
-        MenuItem printStudioItem = new MenuItem("🖨️ Imprimir Moldes 1:1 & Paginação...");
+        MenuItem printStudioItem = new MenuItem("🖨️ Estúdio de Impressão 1:1 & Paginação...");
         printStudioItem.setOnAction(e -> PrintStudioDialog.showDialog(stage, document));
 
         MenuItem exitItem = new MenuItem("Sair");
@@ -233,7 +236,7 @@ public class MainApp extends Application {
 
         fileMenu.getItems().addAll(
             newItem, openItem, saveItem, saveAsItem, new SeparatorMenuItem(),
-            exportSvg, exportDxf, exportPdf, exportPng, new SeparatorMenuItem(),
+            exportDialogItem, exportSvg, exportDxf, exportPdf, exportPng, new SeparatorMenuItem(),
             printStudioItem, new SeparatorMenuItem(), exitItem
         );
 
