@@ -1,18 +1,20 @@
 package com.leathercad.ui;
 
 import com.leathercad.core.model.Document;
-import com.leathercad.core.parametric.BifoldWalletTemplate;
-import com.leathercad.core.parametric.FoldType;
-import com.leathercad.core.parametric.ProjectVariables;
+import com.leathercad.core.parametric.*;
 import com.leathercad.ui.viewport.CanvasViewport;
+
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 public class ParametricDialog {
 
@@ -20,92 +22,155 @@ public class ParametricDialog {
         Stage dialog = new Stage();
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(owner);
-        dialog.setTitle("Gerador Inteligente de Carteiras Paramétricas");
+        dialog.setTitle("📐 Gerador Inteligente de Carteiras & Moldes Paramétricos");
+        dialog.setResizable(false);
+
+        VBox mainLayout = new VBox(12);
+        mainLayout.setStyle("-fx-background-color: #141414;");
+        mainLayout.setPadding(new Insets(18));
+
+        Label headerLabel = new Label("Gerador Paramétrico 2D com Live Preview");
+        headerLabel.setStyle("-fx-text-fill: #00FF88; -fx-font-size: 15px; -fx-font-weight: bold;");
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
+        grid.setHgap(12);
         grid.setVgap(10);
-        grid.setPadding(new Insets(15));
 
-        // 1. Modelo de Projeto
-        ComboBox<String> modelCombo = new ComboBox<>();
-        modelCombo.getItems().addAll("Carteira Bifold (2 Abas)", "Porta-Cartões Minimalista");
-        modelCombo.setValue("Carteira Bifold (2 Abas)");
+        // 1. Seleção do Modelo Paramétrico (via ParametricRegistry)
+        List<ParametricTemplate> templates = ParametricRegistry.getInstance().getAllTemplates();
+        ComboBox<ParametricTemplate> modelCombo = new ComboBox<>();
+        modelCombo.getItems().addAll(templates);
+        if (!templates.isEmpty()) modelCombo.setValue(templates.get(0));
+
+        modelCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(ParametricTemplate item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getName());
+            }
+        });
+
+        modelCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(ParametricTemplate item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getName());
+            }
+        });
 
         // 2. Espessura do Couro
-        Spinner<Double> thicknessSpinner = new Spinner<>(0.6, 3.5, 1.4, 0.1);
+        Spinner<Double> thicknessSpinner = new Spinner<>(0.6, 4.0, 1.4, 0.1);
         thicknessSpinner.setEditable(true);
 
         // 3. Número de Cartões
-        Spinner<Integer> cardsSpinner = new Spinner<>(2, 12, 6, 2);
+        Spinner<Integer> cardsSpinner = new Spinner<>(2, 16, 6, 2);
 
-        // 4. Largura Fechada
-        Spinner<Double> widthSpinner = new Spinner<>(80.0, 150.0, 115.0, 5.0);
+        // 4. Dimensões: Largura Fechada & Altura
+        Spinner<Double> widthSpinner = new Spinner<>(70.0, 200.0, 105.0, 5.0);
         widthSpinner.setEditable(true);
 
-        // 5. Altura (com recálculo reativo em função dos cartões)
-        Spinner<Double> heightSpinner = new Spinner<>(60.0, 160.0, 85.0, 5.0);
+        Spinner<Double> heightSpinner = new Spinner<>(60.0, 200.0, 85.0, 5.0);
         heightSpinner.setEditable(true);
 
-        Runnable updateHeight = () -> {
-            boolean isCardHolder = modelCombo.getValue().contains("Porta-Cartões");
-            int numCards = cardsSpinner.getValue();
-            int slots = isCardHolder ? numCards : (int) Math.ceil(numCards / 2.0);
-            double minH = 5.0 + ((slots - 1) * 14.0) + 45.0 + 15.0;
-            if (heightSpinner.getValue() < minH) {
-                heightSpinner.getValueFactory().setValue(minH);
-            }
+        // 5. Parâmetros de Costura: Margem & Passo (Pitch)
+        Spinner<Double> marginSpinner = new Spinner<>(1.0, 10.0, 3.85, 0.1);
+        marginSpinner.setEditable(true);
+
+        ComboBox<String> pitchCombo = new ComboBox<>();
+        pitchCombo.getItems().addAll("#7 (3.85 mm)", "#8 (3.38 mm)", "#6 (4.00 mm)", "#10 (2.70 mm)");
+        pitchCombo.setValue("#7 (3.85 mm)");
+
+        // 6. Checkbox de Cotas Técnicas
+        CheckBox showDimensionsCheck = new CheckBox("Exibir Cotas Técnicas no Canvas (ANNOTATION_LAYER)");
+        showDimensionsCheck.setSelected(true);
+        showDimensionsCheck.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+
+        // Função de Atualização Reativa (Live Preview no Canvas2D)
+        Runnable updateLivePreview = () -> {
+            ParametricTemplate selectedTemplate = modelCombo.getValue();
+            if (selectedTemplate == null) return;
+
+            VariableTable vt = selectedTemplate.createDefaultVariables();
+            vt.updateVariableValue("width", widthSpinner.getValue());
+            vt.updateVariableValue("height", heightSpinner.getValue());
+            vt.updateVariableValue("leather_thickness", thicknessSpinner.getValue());
+            vt.updateVariableValue("card_slots", cardsSpinner.getValue());
+            vt.updateVariableValue("margin", marginSpinner.getValue());
+
+            double pitchVal = 3.85;
+            String pitchTxt = pitchCombo.getValue();
+            if (pitchTxt.contains("3.38")) pitchVal = 3.38;
+            else if (pitchTxt.contains("4.00")) pitchVal = 4.00;
+            else if (pitchTxt.contains("2.70")) pitchVal = 2.70;
+            vt.updateVariableValue("pitch", pitchVal);
+
+            selectedTemplate.generate(document, vt, showDimensionsCheck.isSelected());
+            viewport.redraw();
         };
 
-        cardsSpinner.valueProperty().addListener((obs, oldV, newV) -> updateHeight.run());
-        modelCombo.valueProperty().addListener((obs, oldV, newV) -> updateHeight.run());
+        // Listeners para todos os seletores acionarem o Live Preview instantâneo
+        modelCombo.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        thicknessSpinner.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        cardsSpinner.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        widthSpinner.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        heightSpinner.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        marginSpinner.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        pitchCombo.valueProperty().addListener((obs, o, n) -> updateLivePreview.run());
+        showDimensionsCheck.setOnAction(e -> updateLivePreview.run());
 
-        grid.add(new Label("Modelo de Artigo:"), 0, 0);
-        grid.add(modelCombo, 1, 0);
+        // Adicionar campos ao Grid
+        int row = 0;
+        grid.add(new Label("Modelo de Artigo:"), 0, row);
+        grid.add(modelCombo, 1, row++);
 
-        grid.add(new Label("Espessura do Couro (mm):"), 0, 1);
-        grid.add(thicknessSpinner, 1, 1);
+        grid.add(new Label("Espessura do Couro (mm):"), 0, row);
+        grid.add(thicknessSpinner, 1, row++);
 
-        grid.add(new Label("Quantidade de Cartões:"), 0, 2);
-        grid.add(cardsSpinner, 1, 2);
+        grid.add(new Label("Quantidade de Cartões:"), 0, row);
+        grid.add(cardsSpinner, 1, row++);
 
-        grid.add(new Label("Largura Fechada (mm):"), 0, 3);
-        grid.add(widthSpinner, 1, 3);
+        grid.add(new Label("Largura (mm):"), 0, row);
+        grid.add(widthSpinner, 1, row++);
 
-        grid.add(new Label("Altura (mm):"), 0, 4);
-        grid.add(heightSpinner, 1, 4);
+        grid.add(new Label("Altura (mm):"), 0, row);
+        grid.add(heightSpinner, 1, row++);
 
-        Button generateBtn = new Button("🚀 Gerar Molde Técnico");
+        grid.add(new Label("Margem de Costura (mm):"), 0, row);
+        grid.add(marginSpinner, 1, row++);
+
+        grid.add(new Label("Passo de Garfo (Pitch):"), 0, row);
+        grid.add(pitchCombo, 1, row++);
+
+        grid.getChildren().forEach(n -> {
+            if (n instanceof Label l) l.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+        });
+
+        // Executar primeiro Live Preview
+        updateLivePreview.run();
+
+        // Botões de Ação
+        Button cancelBtn = new Button("Cancelar");
+        cancelBtn.setStyle("-fx-background-color: #333; -fx-text-fill: white;");
+        cancelBtn.setOnAction(e -> dialog.close());
+
+        Button generateBtn = new Button("🚀 Confirmar Molde");
         generateBtn.setStyle("-fx-background-color: #00A8FF; -fx-text-fill: white; -fx-font-weight: bold;");
-
         generateBtn.setOnAction(e -> {
-            boolean isCardHolder = modelCombo.getValue().contains("Porta-Cartões");
-            ProjectVariables vars = new ProjectVariables(
-                widthSpinner.getValue(),
-                heightSpinner.getValue(),
-                thicknessSpinner.getValue(),
-                cardsSpinner.getValue(),
-                isCardHolder ? FoldType.SINGLE_FOLD : FoldType.BIFOLD,
-                3.85,
-                3.85
-            );
-
-            if (isCardHolder) {
-                com.leathercad.core.parametric.CardHolderTemplate.generateCardHolder(document, vars);
-            } else {
-                BifoldWalletTemplate.generateBifoldWallet(document, vars);
-            }
-            viewport.redraw();
+            updateLivePreview.run();
             dialog.close();
         });
 
-        HBox btnBox = new HBox(generateBtn);
-        btnBox.setPadding(new Insets(10, 0, 0, 0));
-        grid.add(btnBox, 1, 5);
+        HBox btnBox = new HBox(10, cancelBtn, generateBtn);
+        btnBox.setAlignment(Pos.CENTER_RIGHT);
 
-        Scene scene = new Scene(grid, 420, 280);
-        scene.getStylesheets().add(ParametricDialog.class.getResource("/styles/dark-theme.css").toExternalForm());
+        mainLayout.getChildren().addAll(headerLabel, grid, showDimensionsCheck, btnBox);
+
+        Scene scene = new Scene(mainLayout, 460, 390);
+        try {
+            scene.getStylesheets().add(ParametricDialog.class.getResource("/styles/dark-theme.css").toExternalForm());
+        } catch (Exception ignored) {}
+
         dialog.setScene(scene);
-        dialog.showAndWait();
+        dialog.show();
     }
 }

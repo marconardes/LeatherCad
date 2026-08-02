@@ -62,6 +62,19 @@ public class Document {
             .orElseGet(() -> activeLayer != null ? activeLayer.getId() : (layers.isEmpty() ? "" : layers.get(0).getId()));
     }
 
+    public String getAnnotationLayerId() {
+        return layers.stream()
+            .filter(l -> l.getName().equalsIgnoreCase("Cotas Técnicas") || l.getName().toLowerCase().contains("cota") || l.getName().toLowerCase().contains("annotation"))
+            .map(Layer::getId)
+            .findFirst()
+            .orElseGet(() -> {
+                Layer dimLayer = new Layer("Cotas Técnicas", "#FFD700", 3);
+                layers.add(dimLayer);
+                if (onLayersChangedListener != null) onLayersChangedListener.run();
+                return dimLayer.getId();
+            });
+    }
+
     private final List<Runnable> onDocumentChangedListeners = new ArrayList<>();
 
     public void addOnDocumentChangedListener(Runnable listener) {

@@ -4,6 +4,7 @@ com/leathercad/ui/SimulationDialog.class
 com/leathercad/ui/tools/OffsetTool.class
 com/leathercad/ui/tools/FilletTool.class
 com/leathercad/core/leather/CreaseElement.class
+com/leathercad/core/parametric/ParametricTemplate.class
 com/leathercad/ui/CornerRadiusDialog.class
 com/leathercad/ui/ProductionReportDialog.class
 com/leathercad/core/model/BezierElement.class
@@ -13,6 +14,7 @@ com/leathercad/core/ai/AIPromptPreset.class
 com/leathercad/core/export/PNGExporter.class
 com/leathercad/core/parametric/Variable.class
 com/leathercad/ui/MaterialManagerDialog.class
+com/leathercad/ui/ParametricDialog$1.class
 com/leathercad/ui/ExportDialog.class
 com/leathercad/core/model/DimensionElement$DimensionType.class
 com/leathercad/core/render/RealisticHardwareRenderer$MetalFinish.class
@@ -26,6 +28,7 @@ com/leathercad/ui/tools/SelectTool.class
 com/leathercad/ui/StitchConfigDialog.class
 com/leathercad/core/geometry/Circle2D.class
 com/leathercad/core/geometry/LineSegment.class
+com/leathercad/core/parametric/ParametricRegistry.class
 com/leathercad/ui/RealisticRenderDialog.class
 com/leathercad/core/geometry/Vector2D.class
 com/leathercad/core/simulation/FoldSimulator.class
@@ -93,6 +96,7 @@ com/leathercad/core/ai/AIDesignGenerator.class
 com/leathercad/core/render/LeatherTextureGenerator.class
 com/leathercad/ui/tools/ToolManager.class
 com/leathercad/ui/tools/PolylineTool.class
+com/leathercad/ui/ParametricDialog$2.class
 com/leathercad/core/model/ArcElement.class
 com/leathercad/core/render/RealisticHardwareRenderer.class
 com/leathercad/ui/tools/RectTool.class

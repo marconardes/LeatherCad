@@ -53,6 +53,8 @@
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/FormulaEngine.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/LeatherFoldCalculator.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/ParametricEngine.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/ParametricRegistry.java
+/home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/ParametricTemplate.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/ProjectVariables.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/Variable.java
 /home/marconardes/Backup_Pessoal/IAS Project/LeatherCadAtual/src/main/java/com/leathercad/core/parametric/VariableTable.java
