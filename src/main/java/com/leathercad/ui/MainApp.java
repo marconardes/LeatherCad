@@ -116,22 +116,23 @@ public class MainApp extends Application {
 
             // Atalhos específicos para a ferramenta ativa quando não estiver digitando em campo de texto
             if (!(scene.getFocusOwner() instanceof javafx.scene.control.TextInputControl)) {
+                switch (event.getCode()) {
+                    case D -> {
+                        selectTool("Cota Linear (D)");
+                        viewport.redraw();
+                        return;
+                    }
+                    case T -> {
+                        selectTool("Nota Técnica (T)");
+                        viewport.redraw();
+                        return;
+                    }
+                }
+
                 if (toolManager.getActiveTool() instanceof com.leathercad.ui.tools.DimensionTool dimTool) {
                     switch (event.getCode()) {
-                        case D -> {
-                            dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.LINEAR);
-                            updateContextToolBar();
-                            viewport.redraw();
-                            return;
-                        }
                         case R -> {
                             dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.RADIUS);
-                            updateContextToolBar();
-                            viewport.redraw();
-                            return;
-                        }
-                        case T -> {
-                            dimTool.setCurrentType(com.leathercad.core.model.DimensionElement.DimensionType.CALLOUT_NOTE);
                             updateContextToolBar();
                             viewport.redraw();
                             return;
@@ -569,13 +570,13 @@ public class MainApp extends Application {
         ToggleButton offsetBtn = CADIconFactory.createIconToggleButton(IconType.OFFSET, "Margem de Costura / Offset Paralelo (O)", toolGroup);
         offsetBtn.setOnAction(e -> selectTool("Margem de Costura / Offset"));
 
-        ToggleButton dimHBtn = CADIconFactory.createIconToggleButton(IconType.DIM_HORIZONTAL, "Cota Horizontal", toolGroup);
-        dimHBtn.setOnAction(e -> selectTool("Cota Horizontal"));
+        ToggleButton dimHBtn = CADIconFactory.createIconToggleButton(IconType.DIM_HORIZONTAL, "Cota Linear e Alinhada (D)", toolGroup);
+        dimHBtn.setOnAction(e -> selectTool("Cota Linear (D)"));
 
-        ToggleButton dimVBtn = CADIconFactory.createIconToggleButton(IconType.DIM_VERTICAL, "Cota Vertical", toolGroup);
-        dimVBtn.setOnAction(e -> selectTool("Cota Vertical"));
+        ToggleButton dimVBtn = CADIconFactory.createIconToggleButton(IconType.DIM_VERTICAL, "Cota Vertical / Horizontal", toolGroup);
+        dimVBtn.setOnAction(e -> selectTool("Cota Horizontal"));
 
-        ToggleButton dimRBtn = CADIconFactory.createIconToggleButton(IconType.DIM_RADIUS, "Cota Raio", toolGroup);
+        ToggleButton dimRBtn = CADIconFactory.createIconToggleButton(IconType.DIM_RADIUS, "Cota Raio (R)", toolGroup);
         dimRBtn.setOnAction(e -> selectTool("Cota Raio"));
 
         Button moveBtn = CADIconFactory.createIconButton(IconType.MOVE, "Mover Elementos Selecionados");

@@ -44,15 +44,7 @@ public class DimensionTool implements CADTool {
 
     @Override
     public String getName() {
-        return switch (currentType) {
-            case LINEAR -> "Cota Linear (D)";
-            case RADIUS -> "Cota Raio (R)";
-            case ANGULAR -> "Cota Angular";
-            case CALLOUT_NOTE -> "Nota Técnica (T)";
-            case HORIZONTAL -> "Cota Horizontal";
-            case VERTICAL -> "Cota Vertical";
-            case DIAMETER -> "Cota Diâmetro";
-        };
+        return "Cotagem e Ficha Técnica";
     }
 
     @Override
@@ -101,6 +93,24 @@ public class DimensionTool implements CADTool {
                 );
                 document.addElement(dim);
                 reset();
+                return;
+            } else {
+                if (stage == 0) {
+                    p1 = worldPoint;
+                    stage = 1;
+                } else if (stage == 1) {
+                    p2 = worldPoint;
+                    double r = p1.distanceTo(p2);
+                    DimensionElement dim = new DimensionElement(
+                        document.getActiveLayer().getId(),
+                        p1,
+                        p2,
+                        DimensionElement.DimensionType.RADIUS,
+                        r
+                    );
+                    document.addElement(dim);
+                    reset();
+                }
                 return;
             }
         }
